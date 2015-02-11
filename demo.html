@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Snakes (Demo)</title>
+		<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+		<script src="../webcomponentsjs/webcomponents.js"></script>
+		<link rel="import" href="../font-roboto/roboto.html">
+		<link rel="import" href="../core-tooltip/core-tooltip.html">
+		<link rel="import" href="../core-icons/core-icons.html">
+		<link rel="import" href="../paper-toggle-button/paper-toggle-button.html">
+		<link rel="import" href="../game-snakes/game-snakes.html">
+		<style shim-shadowdom>
+			body {
+				background-color: #EEEEEE;
+				font-family: 'RobotoDraft', sans-serif;
+			}
+			#card {
+				height: 544px;
+				width: 480px;
+				margin: auto;
+			}
+			.bar {
+				color: #FFFFFF;
+				height: 64px;
+			}
+			paper-toggle-button::shadow [checked] .toggle {
+				background-color: #FF4081;
+			}
+			paper-toggle-button::shadow [checked] .toggle-ink {
+				color: #FF4081;
+			}
+			.gap {
+				width: 20px;
+			}
+			.default {
+				background-color: #FFFFFF;
+				border-radius: 2px;
+				box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.16), 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+				overflow: hidden;
+			}
+			.default .bar {
+				background-color: #4CAF50;
+			}
+			.styled game-snakes {
+				background-color: #4A148C;
+			}
+			.styled .bar, .styled game-snakes::shadow #play {
+				background-color: #7B1FA2;
+			}
+			.styled game-snakes::shadow #food {
+				border-radius: 2px;
+				box-shadow: none;
+			}
+			.styled game-snakes::shadow .tail, .styled game-snakes::shadow #head {
+				background-color: transparent;
+				background-image: url('../game-snakes/hexagon.png');
+				background-repeat: no-repeat;
+				background-size: contain;
+				box-shadow: none;
+			}
+			.styled game-snakes::shadow #overlay {
+				background-color: rgba(255,255,255,0.54);
+			}
+		</style>
+	</head>
+	<body fullbleed unresolved>
+		<div id="card" class="default" fit>
+			<game-snakes score="{{score1}}"></game-snakes>
+			<div class="bar" horizontal layout center>
+				<div class="gap"></div>
+				<div>Score: <span id="score">0</span></div>
+				<div class="gap"></div>
+				<div class="gap"></div>
+				<div>Playing: <span id="playing">false</span></div>
+				<div flex></div>
+				<div>Styled</div>
+				<div class="gap"></div>
+				<paper-toggle-button id="toggle"></paper-toggle-button>
+				<div class="gap"></div>
+				<div class="gap"></div>
+				<core-tooltip position="left">
+					<core-icon icon="info"></core-icon>
+				</core-tooltip>
+				<div class="gap"></div>
+			</div>
+		</div>
+		<script>
+			window.addEventListener('polymer-ready', function() {
+				document.querySelector('core-tooltip').label = document.querySelector('game-snakes').instructions;
+				document.querySelector('paper-toggle-button').addEventListener('change', function () {
+					if (this.checked) {
+						document.querySelector('#card').className = 'styled';
+					} else {
+						document.querySelector('#card').className = 'default';
+					}
+				});
+				document.querySelector('game-snakes').addEventListener('score', function (e) {
+					document.querySelector('#score').innerHTML = document.querySelector('game-snakes').score;
+				});
+				document.querySelector('game-snakes').addEventListener('playing', function (e) {
+					document.querySelector('#playing').innerHTML = document.querySelector('game-snakes').playing;
+				});
+			});
+		</script>
+	</body>
+</html>

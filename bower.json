@@ -1,0 +1,33 @@
+{
+	"name": "game-snakes",
+	"version": "0.1.0",
+	"authors": [
+		"Naman Nehra <naman.nehra98@gmail.com>"
+	],
+	"description": "Element providing a basic configurable snakes game.",
+	"keywords": [
+		"game",
+		"snakes",
+		"web-component",
+		"web-components",
+		"polymer"
+	],
+	"main": "game-snakes.html",
+	"license": "MIT",
+	"homepage": "https://github.com/namannehra/game-snakes/",
+	"ignore": [
+		"/.*",
+		"/tests/"
+	],
+	"dependencies": {
+		"polymer": "Polymer/polymer#^0.5.4",
+		"core-icons": "Polymer/core-icons#^0.5.4",
+		"paper-fab": "Polymer/paper-fab#^0.5.4",
+		"font-roboto": "Polymer/font-roboto#^0.5.4",
+		"core-tooltip": "Polymer/core-tooltip#^0.5.4",
+		"paper-toggle-button": "Polymer/paper-toggle-button#^0.5.4"
+	},
+	"devDependencies": {
+		"web-component-tester": "Polymer/web-component-tester#^2.2.3"
+	}
+}
