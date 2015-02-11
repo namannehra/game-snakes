@@ -31,11 +31,11 @@ game-snakes {
 }
 
 /*styling play button*/
-game-snakes::shadow #play {
+game-snakes::shadow #playButton {
 	background-color: #7B1FA2;
 }
 
-/*styling play food*/
+/*styling food*/
 game-snakes::shadow #food {
 	border-radius: 2px;
 	box-shadow: none;
