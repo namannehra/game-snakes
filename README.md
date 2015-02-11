@@ -5,12 +5,12 @@ See the [component page](http://namannehra.github.io/game-snakes/) for more info
 
 ## Getting Started
 
-Import the element inside <head> tag:
+Import the element inside ```<head>``` tag:
 ```
 <link rel="import" href="../game-snakes/game-snakes.html">
 ```
 
-Put <game-snakes> tag inside <body> tag:
+Put ```<game-snakes>``` tag inside ```<body>``` tag:
 ```
 <game-snakes></game-snakes>
 ```
