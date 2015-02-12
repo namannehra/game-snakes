@@ -15,28 +15,24 @@
 				font-family: 'RobotoDraft', sans-serif;
 			}
 			#card {
-				height: 544px;
+				background-color: #FFFFFF;
+				border-radius: 2px;
+				box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.16), 0 2px 5px 0 rgba(0, 0, 0, 0.26);
 				width: 480px;
-				margin: auto;
+				overflow: hidden;
 			}
 			.bar {
 				color: #FFFFFF;
 				height: 64px;
+			}
+			paper-toggle-button {
+				margin-left: 4px;
 			}
 			paper-toggle-button::shadow [checked] .toggle {
 				background-color: #FF4081;
 			}
 			paper-toggle-button::shadow [checked] .toggle-ink {
 				color: #FF4081;
-			}
-			.gap {
-				width: 20px;
-			}
-			.default {
-				background-color: #FFFFFF;
-				border-radius: 2px;
-				box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.16), 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-				overflow: hidden;
 			}
 			.default .bar {
 				background-color: #4CAF50;
@@ -63,27 +59,23 @@
 			}
 		</style>
 	</head>
-	<body fullbleed unresolved>
-		<div id="card" class="default" fit>
-			<game-snakes score="{{score1}}"></game-snakes>
-			<div class="bar" horizontal layout center>
-				<div class="gap"></div>
+	<body fullbleed vertical layout center unresolved>
+		<div flex></div>
+		<div id="card" class="default">
+			<game-snakes></game-snakes>
+			<div class="bar" horizontal around-justified layout center>
 				<div>Score: <span id="score">0</span></div>
-				<div class="gap"></div>
-				<div class="gap"></div>
 				<div>Playing: <span id="playing">false</span></div>
-				<div flex></div>
-				<div>Styled</div>
-				<div class="gap"></div>
-				<paper-toggle-button id="toggle"></paper-toggle-button>
-				<div class="gap"></div>
-				<div class="gap"></div>
+				<div>
+					<span>Styled:</span>
+					<paper-toggle-button id="toggle"></paper-toggle-button>
+				</div>
 				<core-tooltip position="left">
 					<core-icon icon="info"></core-icon>
 				</core-tooltip>
-				<div class="gap"></div>
 			</div>
 		</div>
+		<div flex></div>
 		<script>
 			window.addEventListener('polymer-ready', function() {
 				document.querySelector('core-tooltip').label = document.querySelector('game-snakes').instructions;
