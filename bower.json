@@ -4,7 +4,7 @@
 	"authors": [
 		"Naman Nehra <naman.nehra98@gmail.com>"
 	],
-	"description": "Element providing a basic configurable snakes game.",
+	"description": "Web component providing a basic configurable snakes game.",
 	"keywords": [
 		"game",
 		"snakes",
