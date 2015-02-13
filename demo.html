@@ -5,9 +5,6 @@
 		<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 		<script src="../webcomponentsjs/webcomponents.js"></script>
 		<link rel="import" href="../font-roboto/roboto.html">
-		<link rel="import" href="../core-tooltip/core-tooltip.html">
-		<link rel="import" href="../core-icons/core-icons.html">
-		<link rel="import" href="../paper-toggle-button/paper-toggle-button.html">
 		<link rel="import" href="../game-snakes/game-snakes.html">
 		<style shim-shadowdom>
 			body {
@@ -71,7 +68,7 @@
 				document.querySelector('.score-playing game-snakes').addEventListener('playing', function() {
 					document.querySelector('.score-playing .playing').innerHTML = this.playing;
 				});
-				// Running more than one game at time may cause problems. Use the following fix.
+				// Running more than one game at a time may cause problems. Use the following fix.
 				var x = document.querySelectorAll('game-snakes');
 				for (var i = 0; i < x.length; i++) {
 					x[i].addEventListener('playing', function() {
