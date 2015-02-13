@@ -11,36 +11,25 @@
 		<link rel="import" href="../game-snakes/game-snakes.html">
 		<style shim-shadowdom>
 			body {
-				background-color: #EEEEEE;
+				background-color: #E0E0E0;
 				font-family: 'RobotoDraft', sans-serif;
 			}
-			#card {
+			body > div {
+				min-height: 100%;
+			}
+			body > div > div > span {
+				font-weight: bold;
+			}
+			div[flex] {
+				min-height: 40px;
+			}
+			.default game-snakes, .changed-attributes game-snakes, .score-playing game-snakes, .demo game-snakes {
 				background-color: #FFFFFF;
-				border-radius: 2px;
-				box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.16), 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-				width: 480px;
-				overflow: hidden;
-			}
-			.bar {
-				color: #FFFFFF;
-				height: 64px;
-			}
-			paper-toggle-button {
-				margin-left: 4px;
-			}
-			paper-toggle-button::shadow [checked] .toggle {
-				background-color: #FF4081;
-			}
-			paper-toggle-button::shadow [checked] .toggle-ink {
-				color: #FF4081;
-			}
-			.default .bar {
-				background-color: #4CAF50;
 			}
 			.styled game-snakes {
 				background-color: #4A148C;
 			}
-			.styled .bar, .styled game-snakes::shadow #playButton {
+			.styled game-snakes::shadow #playButton {
 				background-color: #7B1FA2;
 			}
 			.styled game-snakes::shadow #food {
@@ -57,42 +46,81 @@
 			.styled game-snakes::shadow #overlay {
 				background-color: rgba(255,255,255,0.54);
 			}
+			.demo > div {
+				background-color: #4CAF50;
+				border-radius: 2px;
+				box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.16), 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+				color: #FFFFFF;
+				overflow: hidden;
+			}
+			.demo > div > div {
+				height: 64px;
+			}
 		</style>
-	</head>
-	<body fullbleed vertical layout center unresolved>
-		<div flex></div>
-		<div id="card" class="default">
-			<game-snakes></game-snakes>
-			<div class="bar" horizontal around-justified layout center>
-				<div>Score: <span id="score">0</span></div>
-				<div>Playing: <span id="playing">false</span></div>
-				<div>
-					<span>Styled:</span>
-					<paper-toggle-button id="toggle"></paper-toggle-button>
-				</div>
-				<core-tooltip position="left">
-					<core-icon icon="info"></core-icon>
-				</core-tooltip>
-			</div>
-		</div>
-		<div flex></div>
 		<script>
 			window.addEventListener('polymer-ready', function() {
-				document.querySelector('core-tooltip').label = document.querySelector('game-snakes').instructions;
-				document.querySelector('paper-toggle-button').addEventListener('change', function () {
-					if (this.checked) {
-						document.querySelector('#card').className = 'styled';
-					} else {
-						document.querySelector('#card').className = 'default';
-					}
+				document.querySelector('.demo game-snakes').addEventListener('score', function() {
+					document.querySelector('.demo .score').innerHTML = this.score;
 				});
-				document.querySelector('game-snakes').addEventListener('score', function (e) {
-					document.querySelector('#score').innerHTML = document.querySelector('game-snakes').score;
+				document.querySelector('.demo game-snakes').addEventListener('playing', function() {
+					document.querySelector('.demo .playing').innerHTML = this.playing;
 				});
-				document.querySelector('game-snakes').addEventListener('playing', function (e) {
-					document.querySelector('#playing').innerHTML = document.querySelector('game-snakes').playing;
+				document.querySelector('.score-playing game-snakes').addEventListener('score', function() {
+					document.querySelector('.score-playing .score').innerHTML = this.score;
 				});
+				document.querySelector('.score-playing game-snakes').addEventListener('playing', function() {
+					document.querySelector('.score-playing .playing').innerHTML = this.playing;
+				});
+				// Running more than one game at time may cause problems. Use the following fix.
+				var x = document.querySelectorAll('game-snakes');
+				for (var i = 0; i < x.length; i++) {
+					x[i].addEventListener('playing', function() {
+						for (var j = 0; j < x.length; j++) {
+							if (x[j] != this && this.playing && x[j].playing) {
+								x[j].end();
+							}
+						}
+					});
+				}
 			});
 		</script>
+	</head>
+	<body fullbleed unresolved>
+		<div vertical layout center>
+			<div flex></div>
+			<div class="demo">
+				<span>Demo:</span>
+				<div>
+					<game-snakes></game-snakes>
+					<div horizontal around-justified layout center>
+						<div>Score: <span class="score">0</span></div>
+						<div>Playing: <span class="playing">false</span></div>
+					</div>
+				</div>
+			</div>
+			<div flex></div>
+			<div class="default">
+				<span>Default:</span>
+				<game-snakes></game-snakes>
+			</div>
+			<div flex></div>
+			<div class="styled">
+				<span>Styled:</span>
+				<game-snakes></game-snakes>
+			</div>
+			<div flex></div>
+			<div class="changed-attributes">
+				<span>Changed attributes:</span>
+				<game-snakes size="40" height="8" width="12" time="600"></game-snakes>
+			</div>
+			<div flex></div>
+			<div class="score-playing">
+				<span>Displaying score and playing state:</span>
+				<game-snakes></game-snakes>
+				<div>Score: <span class="score">0</span></div>
+				<div>Playing: <span class="playing">false</span></div>
+			</div>
+			<div flex></div>
+		</div>
 	</body>
 </html>
