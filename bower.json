@@ -23,9 +23,7 @@
 		"polymer": "Polymer/polymer#^0.5.4",
 		"core-icons": "Polymer/core-icons#^0.5.4",
 		"paper-fab": "Polymer/paper-fab#^0.5.4",
-		"font-roboto": "Polymer/font-roboto#^0.5.4",
-		"core-tooltip": "Polymer/core-tooltip#^0.5.4",
-		"paper-toggle-button": "Polymer/paper-toggle-button#^0.5.4"
+		"font-roboto": "Polymer/font-roboto#^0.5.4"
 	},
 	"devDependencies": {
 		"web-component-tester": "Polymer/web-component-tester#^2.2.3"
