@@ -7,17 +7,12 @@ Web component providing a basic configurable snakes game.
 ##### Example:
     <game-snakes></game-snakes>
 ##### Example with changed size, height, width, time and instructions:
-	<game-snakes size="20" height="15" width="25" time="60" instructions="The regular snakes game"></game-snakes>
+	<game-snakes size="40" height="8" width="12" time="600"></game-snakes>
 ##### Changing style:
 	<style>
 	
 		game-snakes {
 			background-color: #4A148C;
-		}
-	
-		/*styling play button*/
-		game-snakes::shadow #play {
-			background-color: #7B1FA2;
 		}
 	
 		/*styling play food*/
@@ -26,7 +21,7 @@ Web component providing a basic configurable snakes game.
 			box-shadow: none;
 		}
 	
-		/*styling snake's head and tail*/
+		/*styling snake's tail and head*/
 		game-snakes::shadow .tail, game-snakes::shadow #head {
 			background-color: transparent;
 			background-image: url('../game-snakes/hexagon.png');
@@ -38,6 +33,11 @@ Web component providing a basic configurable snakes game.
 		/*styling the overlay behind play button*/
 		game-snakes::shadow #overlay {
 			background-color: rgba(255,255,255,0.54);
+		}
+	
+		/*styling play button*/
+		game-snakes::shadow #playButton {
+			background-color: #7B1FA2;
 		}
 	
 	</style>
@@ -141,16 +141,6 @@ Web component providing a basic configurable snakes game.
 			  * Fired whenever the score changes
 			  * @event score
 			*/
-			scoreChanged: function() {
-				this.fire('score');
-			},
-			/**
-			  * Fired when the game starts or ends
-			  * @event playing
-			*/
-			playingChanged: function() {
-				this.fire('playing');
-			},
 			ready: function() {
 				this.style.height = this.height * this.size + 'px';
 				this.style.width = this.width * this.size + 'px';
@@ -207,7 +197,7 @@ Web component providing a basic configurable snakes game.
 				this.$.food.style.left = this.foodLeft + 'px';
 			},
 			/**
-			  * Starts the game.
+			  * Starts the game
 			  * @method play
 			*/
 			play: function() {
@@ -241,7 +231,7 @@ Web component providing a basic configurable snakes game.
 				}
 			},
 			/**
-			  * Ends the game.
+			  * Ends the game
 			  * @method end
 			*/
 			end: function() {
@@ -319,6 +309,16 @@ Web component providing a basic configurable snakes game.
 						gameSnakes.moving(e);
 					}, this.time);
 				}
+			},
+			scoreChanged: function() {
+				this.fire('score');
+			},
+			/**
+			  * Fired when the game starts or ends
+			  * @event playing
+			*/
+			playingChanged: function() {
+				this.fire('playing');
 			}
 		});
 	</script>
