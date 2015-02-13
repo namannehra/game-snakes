@@ -47,7 +47,7 @@ Web component providing a basic configurable snakes game.
 @homepage https://github.com/namannehra/game-snakes/
 -->
 
-<polymer-element name="game-snakes" attributes="size height width time instructions">
+<polymer-element name="game-snakes" attributes="size height width time">
 	<template>
 		<style>
 			:host {
@@ -90,247 +90,236 @@ Web component providing a basic configurable snakes game.
 		<div id="tails"></div>
 		<div id="head"></div>
 		<div id="overlay" fit>
-			<paper-fab id="playButton" icon="av:play-arrow" fit></paper-fab>
+			<paper-fab id="playButton" icon="av:play-arrow" on-tap="{{play}}" fit></paper-fab>
 		</div>
 	</template>
 	<script>
-		(function() {
-			var gameSnakes, direction, move, foodTop, foodLeft, tailTop, tailLeft, headTop, headLeft, food, tails, tail, head, overlay, playButton;
-			function begin() {
-				direction = 'none';
-				headTop = gameSnakes.height * gameSnakes.size / 2 - gameSnakes.size;
-				headLeft = gameSnakes.width * gameSnakes.size / 2 + gameSnakes.size;
-				tailTop = [headTop, headTop, headTop];
-				tailLeft = [headLeft - (3 * gameSnakes.size), headLeft - (2 * gameSnakes.size), headLeft - gameSnakes.size];
-				head.style.top = headTop + 'px';
-				head.style.left = headLeft + 'px';
+		Polymer({
+			/**
+			  * Sets the size of one block in px
+			  * @attribute size
+			  * @type number
+			  * @default 24
+			*/
+			size: 24,
+			/**
+			  * Sets the number of blocks in height of the game area
+			  * @attribute height
+			  * @type number
+			  * @default 20
+			*/
+			height: 20,
+			/**
+			  * Sets the number of blocks in width of the game area
+			  * @attribute width
+			  * @type number
+			  * @default 20
+			*/
+			width: 20,
+			/**
+			  * Sets the time in which snake moves one block in milliseconds (Reducing this value will increase speed of the snake)
+			  * @attribute time
+			  * @type number
+			  * @default 100
+			*/
+			time: 100,
+			/**
+			  * Returns the current score
+			  * @attribute score
+			  * @type number
+			  * @default 0
+			*/
+			score: 0,
+			/**
+			  * Returns true if game is running
+			  * @attribute playing
+			  * @type boolean
+			  * @default false
+			*/
+			playing: false,
+			/**
+			  * Fired whenever the score changes
+			  * @event score
+			*/
+			scoreChanged: function() {
+				this.fire('score');
+			},
+			/**
+			  * Fired when the game starts or ends
+			  * @event playing
+			*/
+			playingChanged: function() {
+				this.fire('playing');
+			},
+			ready: function() {
+				this.style.height = this.height * this.size + 'px';
+				this.style.width = this.width * this.size + 'px';
+				this.$.food.style.height = this.size - 4 + 'px';
+				this.$.food.style.width = this.size - 4 + 'px';
+				this.$.head.style.height = this.size - 4 + 'px';
+				this.$.head.style.width = this.size - 4 + 'px';
+				this.begin();
+			},
+			begin: function() {
+				this.direction = 'none';
+				this.headTop = this.height * this.size / 2 - this.size;
+				this.headLeft = this.width * this.size / 2 + this.size;
+				this.tailTop = [this.headTop, this.headTop, this.headTop];
+				this.tailLeft = [this.headLeft - (3 * this.size), this.headLeft - (2 * this.size), this.headLeft - this.size];
+				this.$.head.style.top = this.headTop + 'px';
+				this.$.head.style.left = this.headLeft + 'px';
 				for (var i = 0; i < 3; i++) {
-					setTail();
-					tail.id = 'tail' + i;
-					tail.style.top = tailTop[i] + 'px';
-					tail.style.left = tailLeft[i] + 'px';
-					tails.appendChild(tail);
+					this.setTail();
+					this.tail.id = 'tail' + i;
+					this.tail.style.top = this.tailTop[i] + 'px';
+					this.tail.style.left = this.tailLeft[i] + 'px';
+					this.$.tails.appendChild(this.tail);
 				}
-				createFood();
-			}
-			function setTail() {
-				tail = document.createElement('div');
-				tail.className = 'tail';
-				tail.style.height = gameSnakes.size - 4 + 'px';
-				tail.style.width = gameSnakes.size - 4 + 'px';
-			}
-			function growTail() {
-				setTail();
-				tail.id = 'tail' + (gameSnakes.score + 2);
-				tail.style.top = headTop + 'px';
-				tail.style.left = headLeft + 'px';
-				setTimeout(function(){
-					tails.appendChild(tail);
-				}, tails.childNodes.length * gameSnakes.time);
-			}
-			function createFood() {
+				this.createFood();
+			},
+			setTail: function() {
+				this.tail = document.createElement('div');
+				this.tail.className = 'tail';
+				this.tail.style.height = this.size - 4 + 'px';
+				this.tail.style.width = this.size - 4 + 'px';
+			},
+			growTail: function() {
+				this.setTail();
+				this.tail.id = 'tail' + (this.score + 2);
+				this.tail.style.top = this.headTop + 'px';
+				this.tail.style.left = this.headLeft + 'px';
+				this.async(function() {
+					this.$.tails.appendChild(this.tail);
+				}, null, this.$.tails.childNodes.length * this.time);
+			},
+			createFood: function() {
 				loop:while (true) {
-					foodTop = Math.floor(Math.random() * gameSnakes.height) * gameSnakes.size;
-					foodLeft = Math.floor(Math.random() * gameSnakes.width) * gameSnakes.size;
-					for (var i = 0; i <= tails.childNodes.length; i++) {
-						if (foodTop == tailTop[tailTop.length - i] && foodLeft == tailLeft[tailLeft.length - i]) {
+					this.foodTop = Math.floor(Math.random() * this.height) * this.size;
+					this.foodLeft = Math.floor(Math.random() * this.width) * this.size;
+					for (var i = 0; i <= this.$.tails.childNodes.length; i++) {
+						if (this.foodTop == this.tailTop[this.tailTop.length - i] && this.foodLeft == this.tailLeft[this.tailLeft.length - i]) {
 							continue loop;
 						}
 					}
 					break;
 				}
-				food.style.top = foodTop + 'px';
-				food.style.left = foodLeft + 'px';
-			}
-			function play() {
-				gameSnakes.score = 0;
-				gameSnakes.playing = true;
-				food.style.display = 'block';
-				overlay.style.opacity = '0';
-				playButton.style.webkitTransform = 'scale(0)';
-				playButton.style.transform = 'scale(0)';
+				this.$.food.style.top = this.foodTop + 'px';
+				this.$.food.style.left = this.foodLeft + 'px';
+			},
+			/**
+			  * Starts the game.
+			  * @method play
+			*/
+			play: function() {
+				var gameSnakes = this;
+				this.score = 0;
+				this.playing = true;
+				this.$.food.style.display = 'block';
+				this.$.overlay.style.opacity = '0';
+				this.$.playButton.style.webkitTransform = 'scale(0)';
+				this.$.playButton.style.transform = 'scale(0)';
 				document.onkeydown = function(e) {
 					if (gameSnakes.playing) {
-						if (!(direction == 'up' || direction == 'down')) {
+						if (!(gameSnakes.direction == 'up' || gameSnakes.direction == 'down')) {
 							if (e.keyCode == 38 || e.keyCode == 87) {
-								turn('up');
+								gameSnakes.turn('up');
 							}
 							if (e.keyCode == 40 || e.keyCode == 83) {
-								turn('down');
+								gameSnakes.turn('down');
 							}
 						}
-						if (!(direction == 'right' || direction == 'left')) {
+						if (!(gameSnakes.direction == 'right' || gameSnakes.direction == 'left')) {
 							if (e.keyCode == 39 || e.keyCode == 68) {
-								turn('right');
+								gameSnakes.turn('right');
 							}
-							if (direction != 'none' && (e.keyCode == 37 || e.keyCode == 65)) {
-								turn('left');
+							if (gameSnakes.direction != 'none' && (e.keyCode == 37 || e.keyCode == 65)) {
+								gameSnakes.turn('left');
 							}
 						}
 						return false;
 					}
 				}
+			},
+			/**
+			  * Ends the game.
+			  * @method end
+			*/
+			end: function() {
+				this.playing = false;
+				clearInterval(this.move);
+				this.$.food.style.display = 'none';
+				this.$.overlay.style.opacity = '1';
+				this.$.playButton.style.webkitTransform = 'none';
+				this.$.playButton.style.transform = 'none';
+				while (this.$.tails.firstChild) {
+					this.$.tails.removeChild(this.$.tails.firstChild);
+				}
+				this.begin();
+			},
+			moving: function(e) {
+				this.tailTop[this.tailTop.length] = this.headTop;
+				this.tailLeft[this.tailLeft.length] = this.headLeft;
+				if (e == 'up') {
+					this.headTop -= this.size;
+					if (this.headTop < 0) {
+						this.end();
+					} else {
+						this.$.head.style.top = this.headTop + 'px';
+					}
+				}
+				if (e == 'right') {
+					this.headLeft += this.size;
+					if (this.headLeft >= this.width * this.size) {
+						this.end();
+					} else {
+						this.$.head.style.left = this.headLeft + 'px';
+					}
+				}
+				if (e == 'down') {
+					this.headTop += this.size;
+					if (this.headTop >= this.height * this.size) {
+						this.end();
+					} else {
+						this.$.head.style.top = this.headTop + 'px';
+					}
+				}
+				if (e == 'left') {
+					this.headLeft -= this.size;
+					if (this.headLeft < 0) {
+						this.end();
+					} else {
+						this.$.head.style.left = this.headLeft + 'px';
+					}
+				}
+				if (this.playing) {
+					for (var i = 0; i < this.$.tails.childNodes.length; i++) {
+						this.$.tails.childNodes[i].style.top = this.tailTop[this.tailTop.length - i - 1] + 'px';
+						this.$.tails.childNodes[i].style.left = this.tailLeft[this.tailLeft.length - i - 1] + 'px';
+					}
+				}
+				if (this.headTop == this.foodTop && this.headLeft == this.foodLeft) {
+					this.score++;
+					this.growTail();
+					this.createFood();
+				}
+				for (var i = 0; i < this.$.tails.childNodes.length; i++) {
+					if (this.headTop == this.tailTop[this.tailTop.length - i - 1] && this.headLeft == this.tailLeft[this.tailLeft.length - i -1]) {
+						this.end();
+						break;
+					}
+				}
+			},
+			turn: function(e) {
+				gameSnakes = this;
+				this.direction = e;
+				clearInterval(this.move);
+				this.moving(e);
+				if (this.playing) {
+					this.move = setInterval(function() {
+						gameSnakes.moving(e);
+					}, this.time);
+				}
 			}
-			function end() {
-				gameSnakes.playing = false;
-				clearInterval(move);
-				food.style.display = 'none';
-				overlay.style.opacity = '1';
-				playButton.style.webkitTransform = 'none';
-				playButton.style.transform = 'none';
-				while (tails.firstChild) {
-					tails.removeChild(tails.firstChild);
-				}
-				begin();
-			}
-			function turn(e) {
-				function moving() {
-					tailTop[tailTop.length] = headTop;
-					tailLeft[tailLeft.length] = headLeft;
-					if (e == 'up') {
-						headTop -= gameSnakes.size;
-						if (headTop < 0) {
-							end();
-						} else {
-							head.style.top = headTop + 'px';
-						}
-					}
-					if (e == 'right') {
-						headLeft += gameSnakes.size;
-						if (headLeft >= gameSnakes.width * gameSnakes.size) {
-							end();
-						} else {
-							head.style.left = headLeft + 'px';
-						}
-					}
-					if (e == 'down') {
-						headTop += gameSnakes.size;
-						if (headTop >= gameSnakes.height * gameSnakes.size) {
-							end();
-						} else {
-							head.style.top = headTop + 'px';
-						}
-					}
-					if (e == 'left') {
-						headLeft -= gameSnakes.size;
-						if (headLeft < 0) {
-							end();
-						} else {
-							head.style.left = headLeft + 'px';
-						}
-					}
-					if (gameSnakes.playing) {
-						for (var i = 0; i < tails.childNodes.length; i++) {
-							tails.childNodes[i].style.top = tailTop[tailTop.length - i - 1] + 'px';
-							tails.childNodes[i].style.left = tailLeft[tailLeft.length - i - 1] + 'px';
-						}
-					}
-					if (headTop == foodTop && headLeft == foodLeft) {
-						gameSnakes.score++;
-						growTail();
-						createFood();
-					}
-					for (var i = 0; i < tails.childNodes.length; i++) {
-						if (headTop == tailTop[tailTop.length - i - 1] && headLeft == tailLeft[tailLeft.length - i -1]) {
-							end();
-							break;
-						}
-					}
-				}
-				direction = e;
-				clearInterval(move);
-				moving();
-				if (gameSnakes.playing) {
-					move = setInterval(function() {
-						moving();
-					}, gameSnakes.time);
-				}
-			}
-			Polymer({
-				/**
-				  * Sets the size of one block in px
-				  * @attribute size
-				  * @type number
-				  * @default 24
-				*/
-				size: 24,
-				/**
-				  * Sets the number of blocks in height of the game area
-				  * @attribute height
-				  * @type number
-				  * @default 20
-				*/
-				height: 20,
-				/**
-				  * Sets the number of blocks in width of the game area
-				  * @attribute width
-				  * @type number
-				  * @default 20
-				*/
-				width: 20,
-				/**
-				  * Sets the time in which snake moves one block in milliseconds (Reducing this value will increase speed of the snake)
-				  * @attribute time
-				  * @type number
-				  * @default 100
-				*/
-				time: 100,
-				/**
-				  * Sets the instructions of the game
-				  * @attribute instructions
-				  * @type string
-				  * @default 'Use arrow keys or "a, s, w, d" to move'
-				*/
-				instructions: 'Use arrow keys or "a, s, w, d" to move',
-				/**
-				  * Returns the current score
-				  * @attribute score
-				  * @type number
-				  * @default 0
-				*/
-				score: 0,
-				/**
-				  * Returns true if game is running
-				  * @attribute playing
-				  * @type boolean
-				  * @default false
-				*/
-				playing: false,
-				/**
-				  * Fired whenever the score changes
-				  * @event score
-				*/
-				scoreChanged: function() {
-					this.fire('score');
-				},
-				/**
-				  * Fired when the game starts or ends
-				  * @event playing
-				*/
-				playingChanged: function() {
-					this.fire('playing');
-				},
-				created: function() {
-					gameSnakes = this;
-				},
-				ready: function() {
-					food = this.$.food;
-					tails = this.$.tails;
-					head = this.$.head;
-					overlay = this.$.overlay;
-					playButton = this.$.playButton;
-					this.style.height = this.height * this.size + 'px';
-					this.style.width = this.width * this.size + 'px';
-					food.style.height = this.size - 4 + 'px';
-					food.style.width = this.size - 4 + 'px';
-					head.style.height = this.size - 4 + 'px';
-					head.style.width = this.size - 4 + 'px';
-					this.$.playButton.onclick = function() {
-						play();
-					};
-					begin();
-				}
-			});
-		})();
+		});
 	</script>
 </polymer-element>
