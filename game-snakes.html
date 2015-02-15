@@ -1,9 +1,10 @@
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../polymer-gestures/polymer-gestures.html">
 <link rel="import" href="../core-icons/av-icons.html">
 <link rel="import" href="../paper-fab/paper-fab.html">
 
 <!--
-Web component providing a basic configurable snakes game.
+Web component providing a basic configurable snakes game. Use use arrow keys or 'a', 's', 'w', 'd' or touch screen to move.
 ##### Example:
     <game-snakes></game-snakes>
 ##### Example with changed size, height, width and time:
@@ -52,12 +53,14 @@ Web component providing a basic configurable snakes game.
 		<style>
 			:host {
 				display: block;
-				position: relative;
 				-webkit-user-select: none;
 				user-select: none;
 			}
+			#container {
+				height: 100%;
+				position: relative;
+			}
 			#food, .tail, #head {
-				box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.16), 0 2px 5px 0 rgba(0, 0, 0, 0.26);
 				margin: 2px 0 0 2px;
 				position: absolute;
 			}
@@ -86,11 +89,13 @@ Web component providing a basic configurable snakes game.
 				transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
 			}
 		</style>
-		<div id="food"></div>
-		<div id="tails"></div>
-		<div id="head"></div>
-		<div id="overlay" fit>
-			<paper-fab id="playButton" icon="av:play-arrow" on-tap="{{play}}" fit></paper-fab>
+		<div id="container" on-trackstart="{{trackstart}}" on-track="{{track}}">
+			<div id="food"></div>
+			<div id="tails"></div>
+			<div id="head"></div>
+			<div id="overlay" fit>
+				<paper-fab id="playButton" icon="av:play-arrow" on-tap="{{play}}" fit></paper-fab>
+			</div>
 		</div>
 	</template>
 	<script>
@@ -137,10 +142,6 @@ Web component providing a basic configurable snakes game.
 			  * @default false
 			*/
 			playing: false,
-			/**
-			  * Fired whenever the score changes
-			  * @event score
-			*/
 			ready: function() {
 				this.style.height = this.height * this.size + 'px';
 				this.style.width = this.width * this.size + 'px';
@@ -156,6 +157,7 @@ Web component providing a basic configurable snakes game.
 				this.headLeft = this.width * this.size / 2 + this.size;
 				this.tailTop = [this.headTop, this.headTop, this.headTop];
 				this.tailLeft = [this.headLeft - (3 * this.size), this.headLeft - (2 * this.size), this.headLeft - this.size];
+				this.$.container.removeAttribute('touch-action');
 				this.$.head.style.top = this.headTop + 'px';
 				this.$.head.style.left = this.headLeft + 'px';
 				for (var i = 0; i < 3; i++) {
@@ -166,6 +168,20 @@ Web component providing a basic configurable snakes game.
 					this.$.tails.appendChild(this.tail);
 				}
 				this.createFood();
+			},
+			createFood: function() {
+				loop:for (var i = 1; i > 0; i++) {
+					this.foodTop = Math.floor(Math.random() * this.height) * this.size;
+					this.foodLeft = Math.floor(Math.random() * this.width) * this.size;
+					for (var i = 0; i <= this.$.tails.childNodes.length; i++) {
+						if (this.foodTop == this.tailTop[this.tailTop.length - i] && this.foodLeft == this.tailLeft[this.tailLeft.length - i]) {
+							continue loop;
+						}
+					}
+					break;
+				}
+				this.$.food.style.top = this.foodTop + 'px';
+				this.$.food.style.left = this.foodLeft + 'px';
 			},
 			setTail: function() {
 				this.tail = document.createElement('div');
@@ -182,51 +198,69 @@ Web component providing a basic configurable snakes game.
 					this.$.tails.appendChild(this.tail);
 				}, null, this.$.tails.childNodes.length * this.time);
 			},
-			createFood: function() {
-				loop:while (true) {
-					this.foodTop = Math.floor(Math.random() * this.height) * this.size;
-					this.foodLeft = Math.floor(Math.random() * this.width) * this.size;
-					for (var i = 0; i <= this.$.tails.childNodes.length; i++) {
-						if (this.foodTop == this.tailTop[this.tailTop.length - i] && this.foodLeft == this.tailLeft[this.tailLeft.length - i]) {
-							continue loop;
-						}
-					}
-					break;
-				}
-				this.$.food.style.top = this.foodTop + 'px';
-				this.$.food.style.left = this.foodLeft + 'px';
-			},
 			/**
 			  * Starts the game
 			  * @method play
 			*/
 			play: function() {
-				var gameSnakes = this;
 				this.score = 0;
 				this.playing = true;
+				this.$.container.setAttribute('touch-action', 'none');
 				this.$.food.style.display = 'block';
 				this.$.overlay.style.opacity = '0';
 				this.$.playButton.style.webkitTransform = 'scale(0)';
 				this.$.playButton.style.transform = 'scale(0)';
+				this.async(function() {
+					this.$.overlay.style.display = 'none';
+				}, null, 500);
 				document.onkeydown = function(e) {
-					if (gameSnakes.playing) {
-						if (!(gameSnakes.direction == 'up' || gameSnakes.direction == 'down')) {
+					if (this.playing) {
+						if (!(this.direction == 'up' || this.direction == 'down')) {
 							if (e.keyCode == 38 || e.keyCode == 87) {
-								gameSnakes.turn('up');
+								this.turn('up');
 							}
 							if (e.keyCode == 40 || e.keyCode == 83) {
-								gameSnakes.turn('down');
+								this.turn('down');
 							}
 						}
-						if (!(gameSnakes.direction == 'right' || gameSnakes.direction == 'left')) {
+						if (!(this.direction == 'right' || this.direction == 'left')) {
 							if (e.keyCode == 39 || e.keyCode == 68) {
-								gameSnakes.turn('right');
+								this.turn('right');
 							}
-							if (gameSnakes.direction != 'none' && (e.keyCode == 37 || e.keyCode == 65)) {
-								gameSnakes.turn('left');
+							if (this.direction != 'none' && (e.keyCode == 37 || e.keyCode == 65)) {
+								this.turn('left');
 							}
 						}
 						return false;
+					}
+				}.bind(this)
+			},
+			trackstart: function(e) {
+				this.trackstartX = e.clientX;
+				this.trackstartY = e.clientY;
+				this.trackend = false;
+			},
+			track: function(e) {
+				if (this.playing && !this.trackend) {
+					this.trackX = e.clientX - this.trackstartX;
+					this.trackY = e.clientY - this.trackstartY;
+					if (Math.abs(this.trackX) >= Math.abs(this.trackY) && !(this.direction == 'right' || this.direction == 'left')) {
+						if (this.trackX > 0) {
+							this.turn('right');
+							this.trackend = true;
+						} else if (this.trackX < 0) {
+							this.turn('left');
+							this.trackend = true;
+						}
+					}
+					if (Math.abs(this.trackX) <= Math.abs(this.trackY) && !(this.direction == 'up' || this.direction == 'down')) {
+						if (this.trackY > 0) {
+							this.turn('down');
+							this.trackend = true;
+						} else if (this.trackY < 0) {
+							this.turn('up');
+							this.trackend = true;
+						}
 					}
 				}
 			},
@@ -237,14 +271,27 @@ Web component providing a basic configurable snakes game.
 			end: function() {
 				this.playing = false;
 				clearInterval(this.move);
-				this.$.food.style.display = 'none';
-				this.$.overlay.style.opacity = '1';
-				this.$.playButton.style.webkitTransform = 'none';
-				this.$.playButton.style.transform = 'none';
-				while (this.$.tails.firstChild) {
-					this.$.tails.removeChild(this.$.tails.firstChild);
+				this.$.overlay.style.display = 'block';
+				this.async(function() {
+					this.$.food.style.display = 'none';
+					this.$.overlay.style.opacity = '1';
+					this.$.playButton.style.webkitTransform = 'none';
+					this.$.playButton.style.transform = 'none';
+					while (this.$.tails.firstChild) {
+						this.$.tails.removeChild(this.$.tails.firstChild);
+					}
+					this.begin();
+				}, null, 100);
+			},
+			turn: function(e) {
+				this.direction = e;
+				clearInterval(this.move);
+				this.moving(e);
+				if (this.playing) {
+					this.move = setInterval(function() {
+						this.moving(e);
+					}.bind(this), this.time);
 				}
-				this.begin();
 			},
 			moving: function(e) {
 				this.tailTop[this.tailTop.length] = this.headTop;
@@ -299,17 +346,10 @@ Web component providing a basic configurable snakes game.
 					}
 				}
 			},
-			turn: function(e) {
-				gameSnakes = this;
-				this.direction = e;
-				clearInterval(this.move);
-				this.moving(e);
-				if (this.playing) {
-					this.move = setInterval(function() {
-						gameSnakes.moving(e);
-					}, this.time);
-				}
-			},
+			/**
+			  * Fired whenever the score changes
+			  * @event score
+			*/
 			scoreChanged: function() {
 				this.fire('score');
 			},

@@ -1,6 +1,8 @@
 game-snakes
 ============
 
+Web component providing a basic configurable snakes game. Use use arrow keys or 'a', 's', 'w', 'd' or touch screen to move.
+
 See the [component page](http://namannehra.github.io/game-snakes/) for more information.
 
 ## Getting Started
