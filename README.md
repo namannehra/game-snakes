@@ -1,7 +1,7 @@
 game-snakes
 ============
 
-Web component providing a basic configurable snakes game. Use use arrow keys or 'a', 's', 'w', 'd' or touch screen to move.
+Web component providing a basic configurable snakes game. Use use arrow keys or 'a', 's', 'w', 'd' or touch screen to move. Use Space bar or Esc to pause/resume.
 
 See the [component page](https://namannehra.github.io/game-snakes/) for more information.
 
@@ -22,7 +22,7 @@ Put ```<game-snakes>``` tag inside ```<body>``` tag:
 #### Configuring size, height, width, and time (optional)
 Use attributes:
 ```
-<game-snakes size="20" height="15" width="25" time="60" instructions="The regular snakes game"></game-snakes>
+<game-snakes size="40" height="10" width="10" time="60"></game-snakes>
 ```
 
 #### Configuring styling (optional)
@@ -30,11 +30,6 @@ Use CSS:
 ```
 game-snakes {
 	background-color: #4A148C;
-}
-
-/*styling play button*/
-game-snakes::shadow #playButton {
-	background-color: #7B1FA2;
 }
 
 /*styling food*/
@@ -50,11 +45,6 @@ game-snakes::shadow .tail, game-snakes::shadow #head {
 	background-repeat: no-repeat;
 	background-size: contain;
 	box-shadow: none;
-}
-
-/*styling the overlay behind play button*/
-game-snakes::shadow #overlay {
-	background-color: rgba(255,255,255,0.54);
 }
 ```
 

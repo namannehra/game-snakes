@@ -2,9 +2,8 @@
 <html>
 	<head>
 		<title>Snakes (Demo)</title>
-		<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<script src="../webcomponentsjs/webcomponents.js"></script>
-		<link rel="import" href="../font-roboto/roboto.html">
 		<link rel="import" href="../game-snakes/game-snakes.html">
 		<style shim-shadowdom>
 			body {
@@ -26,9 +25,6 @@
 			.styled game-snakes {
 				background-color: #4A148C;
 			}
-			.styled game-snakes::shadow #playButton {
-				background-color: #7B1FA2;
-			}
 			.styled game-snakes::shadow #food {
 				border-radius: 2px;
 				box-shadow: none;
@@ -39,9 +35,6 @@
 				background-repeat: no-repeat;
 				background-size: contain;
 				box-shadow: none;
-			}
-			.styled game-snakes::shadow #overlay {
-				background-color: rgba(255,255,255,0.54);
 			}
 			.demo > div {
 				background-color: #4CAF50;
@@ -56,27 +49,26 @@
 		</style>
 		<script>
 			window.addEventListener('polymer-ready', function() {
-				document.querySelector('.demo game-snakes').addEventListener('score', function() {
+				document.querySelector('.demo game-snakes').addEventListener('score-change', function() {
 					document.querySelector('.demo .score').innerHTML = this.score;
 				});
-				document.querySelector('.demo game-snakes').addEventListener('playing', function() {
-					document.querySelector('.demo .playing').innerHTML = this.playing;
+				document.querySelector('.demo game-snakes').addEventListener('state-change', function() {
+					document.querySelector('.demo .state').innerHTML = this.state;
 				});
-				document.querySelector('.score-playing game-snakes').addEventListener('score', function() {
+				document.querySelector('.score-playing game-snakes').addEventListener('score-change', function() {
 					document.querySelector('.score-playing .score').innerHTML = this.score;
 				});
-				document.querySelector('.score-playing game-snakes').addEventListener('playing', function() {
-					document.querySelector('.score-playing .playing').innerHTML = this.playing;
+				document.querySelector('.score-playing game-snakes').addEventListener('state-change', function() {
+					document.querySelector('.score-playing .state').innerHTML = this.state;
 				});
-				// Running more than one game at a time may cause problems. Use the following fix.
-				var x = document.querySelectorAll('game-snakes');
-				for (var i = 0; i < x.length; i++) {
-					x[i].addEventListener('playing', function() {
-						for (var j = 0; j < x.length; j++) {
-							if (x[j] != this && this.playing && x[j].playing) {
-								x[j].end();
-							}
-						}
+				var games = document.querySelectorAll('game-snakes');
+				var buttons = document.querySelectorAll('button');
+				for (var i = 0; i < buttons.length; i++) {
+					buttons[i].setAttribute('data-number', i);
+				}
+				for (var i = 0; i < games.length; i++) {
+					buttons[i].addEventListener('click', function() {
+						games[this.getAttribute('data-number')].state = 'playing';
 					});
 				}
 			});
@@ -91,31 +83,41 @@
 					<game-snakes></game-snakes>
 					<div horizontal around-justified layout center>
 						<div>Score: <span class="score">0</span></div>
-						<div>Playing: <span class="playing">false</span></div>
+						<div>State: <span class="state">stopped</span></div>
 					</div>
 				</div>
+				<br>
+				<button>Play</button>
 			</div>
 			<div flex></div>
 			<div class="default">
 				<span>Default:</span>
 				<game-snakes></game-snakes>
+				<br>
+				<button>Play</button>
 			</div>
 			<div flex></div>
 			<div class="styled">
 				<span>Styled:</span>
 				<game-snakes></game-snakes>
+				<br>
+				<button>Play</button>
 			</div>
 			<div flex></div>
 			<div class="changed-attributes">
 				<span>Changed attributes:</span>
-				<game-snakes size="40" height="8" width="12" time="600"></game-snakes>
+				<game-snakes size="40" height="10" width="10" time="60"></game-snakes>
+				<br>
+				<button>Play</button>
 			</div>
 			<div flex></div>
 			<div class="score-playing">
 				<span>Displaying score and playing state:</span>
 				<game-snakes></game-snakes>
 				<div>Score: <span class="score">0</span></div>
-				<div>Playing: <span class="playing">false</span></div>
+				<div>State: <span class="state">stopped</span></div>
+				<br>
+				<button>Play</button>
 			</div>
 			<div flex></div>
 		</div>

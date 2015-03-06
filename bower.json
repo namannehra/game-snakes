@@ -1,10 +1,10 @@
 {
 	"name": "game-snakes",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"authors": [
 		"Naman Nehra <naman.nehra98@gmail.com>"
 	],
-	"description": "Web component providing a basic configurable snakes game. Use use arrow keys or 'a', 's', 'w', 'd' or touch screen to move.",
+	"description": "Web component providing a basic configurable snakes game. Use use arrow keys or 'a', 's', 'w', 'd' or touch screen to move. Use Space bar or Esc to pause/resume.",
 	"keywords": [
 		"game",
 		"snakes",
@@ -20,9 +20,7 @@
 		"/tests/"
 	],
 	"dependencies": {
-		"polymer": "Polymer/polymer#latest",
-		"core-icons": "Polymer/core-icons#latest",
-		"paper-fab": "Polymer/paper-fab#latest"
+		"polymer": "Polymer/polymer#latest"
 	},
 	"devDependencies": {
 		"web-component-tester": "Polymer/web-component-tester#latest"

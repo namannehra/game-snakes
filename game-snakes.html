@@ -1,13 +1,11 @@
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../core-icons/av-icons.html">
-<link rel="import" href="../paper-fab/paper-fab.html">
 
 <!--
-Web component providing a basic configurable snakes game. Use use arrow keys or 'a', 's', 'w', 'd' or touch screen to move.
+Web component providing a basic configurable snakes game. Use use arrow keys or 'a', 's', 'w', 'd' or touch screen to move. Use Space bar or Esc to pause/resume.
 ##### Example:
     <game-snakes></game-snakes>
 ##### Example with changed size, height, width and time:
-	<game-snakes size="40" height="8" width="12" time="600"></game-snakes>
+	<game-snakes size="40" height="10" width="10" time="60"></game-snakes>
 ##### Changing style:
 	<style>
 	
@@ -30,24 +28,14 @@ Web component providing a basic configurable snakes game. Use use arrow keys or 
 			box-shadow: none;
 		}
 	
-		/*styling the overlay behind play button*/
-		game-snakes::shadow #overlay {
-			background-color: rgba(255,255,255,0.54);
-		}
-	
-		/*styling play button*/
-		game-snakes::shadow #playButton {
-			background-color: #7B1FA2;
-		}
-	
 	</style>
 @element game-snakes
-@blurb Element providing a basic configurable snakes game.
+@blurb Web component providing a basic configurable snakes game. Use use arrow keys or 'a', 's', 'w', 'd' or touch screen to move.
 @status beta
 @homepage https://github.com/namannehra/game-snakes/
 -->
 
-<polymer-element name="game-snakes" attributes="size height width time">
+<polymer-element name="game-snakes" attributes="size height width time score state">
 	<template>
 		<style>
 			:host {
@@ -62,6 +50,8 @@ Web component providing a basic configurable snakes game. Use use arrow keys or 
 			#food, .tail, #head {
 				margin: 2px 0 0 2px;
 				position: absolute;
+				top: 0;
+				left: 0;
 			}
 			#food {
 				display: none;
@@ -76,25 +66,11 @@ Web component providing a basic configurable snakes game. Use use arrow keys or 
 				background-color: #212121;
 				border-radius: 2px;
 			}
-			#overlay {
-				background-color: rgba(0,0,0,0.54);
-				-webkit-transition: opacity 0.4s cubic-bezier(0.4,0,0.2,1);
-				transition: opacity 0.4s cubic-bezier(0.4,0,0.2,1);
-			}
-			paper-fab {
-				background-color: #4CAF50;
-				margin: auto;
-				-webkit-transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
-				transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
-			}
 		</style>
 		<div id="container" on-trackstart="{{trackstart}}" on-track="{{track}}">
 			<div id="food"></div>
 			<div id="tails"></div>
 			<div id="head"></div>
-			<div id="overlay" fit>
-				<paper-fab id="playButton" icon="av:play-arrow" on-tap="{{play}}" fit></paper-fab>
-			</div>
 		</div>
 	</template>
 	<script>
@@ -103,23 +79,23 @@ Web component providing a basic configurable snakes game. Use use arrow keys or 
 			  * Sets the size of one block in px
 			  * @attribute size
 			  * @type number
-			  * @default 24
+			  * @default 25
 			*/
-			size: 24,
+			size: 25,
 			/**
 			  * Sets the number of blocks in height of the game area
 			  * @attribute height
 			  * @type number
-			  * @default 20
+			  * @default 16
 			*/
-			height: 20,
+			height: 16,
 			/**
 			  * Sets the number of blocks in width of the game area
 			  * @attribute width
 			  * @type number
-			  * @default 20
+			  * @default 16
 			*/
-			width: 20,
+			width: 16,
 			/**
 			  * Sets the time in which snake moves one block in milliseconds (Reducing this value will increase speed of the snake)
 			  * @attribute time
@@ -135,12 +111,12 @@ Web component providing a basic configurable snakes game. Use use arrow keys or 
 			*/
 			score: 0,
 			/**
-			  * Returns true if game is running
-			  * @attribute playing
-			  * @type boolean
-			  * @default false
+			  * Returns or sets the state of the game ('playing', 'paused' or 'stopped')
+			  * @attribute state
+			  * @type string
+			  * @default 'stopped'
 			*/
-			playing: false,
+			state: 'stopped',
 			ready: function() {
 				this.style.height = this.height * this.size + 'px';
 				this.style.width = this.width * this.size + 'px';
@@ -151,25 +127,25 @@ Web component providing a basic configurable snakes game. Use use arrow keys or 
 				this.begin();
 			},
 			begin: function() {
-				this.direction = 'none';
-				this.headTop = this.height * this.size / 2 - this.size;
-				this.headLeft = this.width * this.size / 2 + this.size;
+				this.direction = 'right';
+				this.headTop = (this.height % 2 == 0) ? this.height * this.size / 2 - this.size : this.height * this.size / 2;
+				this.headLeft = this.size * 4;
 				this.tailTop = [this.headTop, this.headTop, this.headTop];
 				this.tailLeft = [this.headLeft - (3 * this.size), this.headLeft - (2 * this.size), this.headLeft - this.size];
 				this.$.container.removeAttribute('touch-action');
-				this.$.head.style.top = this.headTop + 'px';
-				this.$.head.style.left = this.headLeft + 'px';
+				this.$.head.style.webkitTransform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
+				this.$.head.style.transform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
 				for (var i = 0; i < 3; i++) {
 					this.setTail();
 					this.tail.id = 'tail' + i;
-					this.tail.style.top = this.tailTop[i] + 'px';
-					this.tail.style.left = this.tailLeft[i] + 'px';
+					this.tail.style.webkitTransform = 'translateX(' + this.tailLeft[i] + 'px) translateY(' + this.tailTop[i] + 'px)';
+					this.tail.style.transform = 'translateX(' + this.tailLeft[i] + 'px) translateY(' + this.tailTop[i] + 'px)';
 					this.$.tails.appendChild(this.tail);
 				}
 				this.createFood();
 			},
 			createFood: function() {
-				loop:for (var i = 1; i > 0; i++) {
+				loop:while (true) {
 					this.foodTop = Math.floor(Math.random() * this.height) * this.size;
 					this.foodLeft = Math.floor(Math.random() * this.width) * this.size;
 					for (var i = 0; i <= this.$.tails.childNodes.length; i++) {
@@ -179,8 +155,8 @@ Web component providing a basic configurable snakes game. Use use arrow keys or 
 					}
 					break;
 				}
-				this.$.food.style.top = this.foodTop + 'px';
-				this.$.food.style.left = this.foodLeft + 'px';
+				this.$.food.style.webkitTransform = 'translateX(' + this.foodLeft + 'px) translateY(' + this.foodTop + 'px)';
+				this.$.food.style.transform = 'translateX(' + this.foodLeft + 'px) translateY(' + this.foodTop + 'px)';
 			},
 			setTail: function() {
 				this.tail = document.createElement('div');
@@ -191,48 +167,11 @@ Web component providing a basic configurable snakes game. Use use arrow keys or 
 			growTail: function() {
 				this.setTail();
 				this.tail.id = 'tail' + (this.score + 2);
-				this.tail.style.top = this.headTop + 'px';
-				this.tail.style.left = this.headLeft + 'px';
+				this.tail.style.webkitTransform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
+				this.tail.style.transform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
 				this.async(function() {
 					this.$.tails.appendChild(this.tail);
 				}, null, this.$.tails.childNodes.length * this.time);
-			},
-			/**
-			  * Starts the game
-			  * @method play
-			*/
-			play: function() {
-				this.score = 0;
-				this.playing = true;
-				this.$.container.setAttribute('touch-action', 'none');
-				this.$.food.style.display = 'block';
-				this.$.overlay.style.opacity = '0';
-				this.$.playButton.style.webkitTransform = 'scale(0)';
-				this.$.playButton.style.transform = 'scale(0)';
-				this.async(function() {
-					this.$.overlay.style.display = 'none';
-				}, null, 500);
-				document.onkeydown = function(e) {
-					if (this.playing) {
-						if (!(this.direction == 'up' || this.direction == 'down')) {
-							if (e.keyCode == 38 || e.keyCode == 87) {
-								this.turn('up');
-							}
-							if (e.keyCode == 40 || e.keyCode == 83) {
-								this.turn('down');
-							}
-						}
-						if (!(this.direction == 'right' || this.direction == 'left')) {
-							if (e.keyCode == 39 || e.keyCode == 68) {
-								this.turn('right');
-							}
-							if (this.direction != 'none' && (e.keyCode == 37 || e.keyCode == 65)) {
-								this.turn('left');
-							}
-						}
-						return false;
-					}
-				}.bind(this)
 			},
 			trackstart: function(e) {
 				this.trackstartX = e.clientX;
@@ -240,7 +179,7 @@ Web component providing a basic configurable snakes game. Use use arrow keys or 
 				this.trackend = false;
 			},
 			track: function(e) {
-				if (this.playing && !this.trackend) {
+				if (this.state == 'playing' && !this.trackend) {
 					this.trackX = e.clientX - this.trackstartX;
 					this.trackY = e.clientY - this.trackstartY;
 					if (Math.abs(this.trackX) >= Math.abs(this.trackY) && !(this.direction == 'right' || this.direction == 'left')) {
@@ -263,30 +202,11 @@ Web component providing a basic configurable snakes game. Use use arrow keys or 
 					}
 				}
 			},
-			/**
-			  * Ends the game
-			  * @method end
-			*/
-			end: function() {
-				this.playing = false;
-				clearInterval(this.move);
-				this.$.overlay.style.display = 'block';
-				this.async(function() {
-					this.$.food.style.display = 'none';
-					this.$.overlay.style.opacity = '1';
-					this.$.playButton.style.webkitTransform = 'none';
-					this.$.playButton.style.transform = 'none';
-					while (this.$.tails.firstChild) {
-						this.$.tails.removeChild(this.$.tails.firstChild);
-					}
-					this.begin();
-				}, null, 100);
-			},
 			turn: function(e) {
 				this.direction = e;
 				clearInterval(this.move);
 				this.moving(e);
-				if (this.playing) {
+				if (this.state == 'playing') {
 					this.move = setInterval(function() {
 						this.moving(e);
 					}.bind(this), this.time);
@@ -298,39 +218,43 @@ Web component providing a basic configurable snakes game. Use use arrow keys or 
 				if (e == 'up') {
 					this.headTop -= this.size;
 					if (this.headTop < 0) {
-						this.end();
+						this.state = 'stopped';
 					} else {
-						this.$.head.style.top = this.headTop + 'px';
+						this.$.head.style.webkitTransform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
+						this.$.head.style.transform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
 					}
 				}
 				if (e == 'right') {
 					this.headLeft += this.size;
 					if (this.headLeft >= this.width * this.size) {
-						this.end();
+						this.state = 'stopped';
 					} else {
-						this.$.head.style.left = this.headLeft + 'px';
+						this.$.head.style.webkitTransform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
+						this.$.head.style.transform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
 					}
 				}
 				if (e == 'down') {
 					this.headTop += this.size;
 					if (this.headTop >= this.height * this.size) {
-						this.end();
+						this.state = 'stopped';
 					} else {
-						this.$.head.style.top = this.headTop + 'px';
+						this.$.head.style.webkitTransform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
+						this.$.head.style.transform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
 					}
 				}
 				if (e == 'left') {
 					this.headLeft -= this.size;
 					if (this.headLeft < 0) {
-						this.end();
+						this.state = 'stopped';
 					} else {
-						this.$.head.style.left = this.headLeft + 'px';
+						this.$.head.style.webkitTransform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
+						this.$.head.style.transform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
 					}
 				}
-				if (this.playing) {
+				if (this.state == 'playing') {
 					for (var i = 0; i < this.$.tails.childNodes.length; i++) {
-						this.$.tails.childNodes[i].style.top = this.tailTop[this.tailTop.length - i - 1] + 'px';
-						this.$.tails.childNodes[i].style.left = this.tailLeft[this.tailLeft.length - i - 1] + 'px';
+						this.$.tails.childNodes[i].style.webkitTransform = 'translateX(' + this.tailLeft[this.tailLeft.length - i - 1] + 'px) translateY(' + this.tailTop[this.tailTop.length - i - 1] + 'px)';
+						this.$.tails.childNodes[i].style.transform = 'translateX(' + this.tailLeft[this.tailLeft.length - i - 1] + 'px) translateY(' + this.tailTop[this.tailTop.length - i - 1] + 'px)';
 					}
 				}
 				if (this.headTop == this.foodTop && this.headLeft == this.foodLeft) {
@@ -340,24 +264,74 @@ Web component providing a basic configurable snakes game. Use use arrow keys or 
 				}
 				for (var i = 0; i < this.$.tails.childNodes.length; i++) {
 					if (this.headTop == this.tailTop[this.tailTop.length - i - 1] && this.headLeft == this.tailLeft[this.tailLeft.length - i -1]) {
-						this.end();
+						this.state = 'stopped';
 						break;
 					}
 				}
 			},
 			/**
 			  * Fired whenever the score changes
-			  * @event score
+			  * @event score-change
 			*/
 			scoreChanged: function() {
-				this.fire('score');
+				this.fire('score-change');
 			},
 			/**
-			  * Fired when the game starts or ends
-			  * @event playing
+			  * Fired whenever the state changes
+			  * @event state-change
 			*/
-			playingChanged: function() {
-				this.fire('playing');
+			stateChanged: function(e,f) {
+				if (f == 'playing') {
+					this.$.container.setAttribute('touch-action', 'none');
+					this.$.food.style.display = 'block';
+					this.turn(this.direction);
+					if (e == 'stopped') {
+						this.score = 0;
+					}
+					document.onkeydown = function(e) {
+						if (this.state == 'playing') {
+							if (e.keyCode == 27 || e.keyCode == 32) {
+								this.state = 'paused';
+							} else if (!(this.direction == 'up' || this.direction == 'down')) {
+								if (e.keyCode == 38 || e.keyCode == 87) {
+									this.turn('up');
+								}
+								if (e.keyCode == 40 || e.keyCode == 83) {
+									this.turn('down');
+								}
+							} else if (!(this.direction == 'right' || this.direction == 'left')) {
+								if (e.keyCode == 39 || e.keyCode == 68) {
+									this.turn('right');
+								}
+								if (e.keyCode == 37 || e.keyCode == 65) {
+									this.turn('left');
+								}
+							}
+							if (e.keyCode == 27 || e.keyCode == 32 || e.keyCode == 38 || e.keyCode == 87 || e.keyCode == 40 || e.keyCode == 83 || e.keyCode == 39 || e.keyCode == 68 || e.keyCode == 37 || e.keyCode == 65) {
+								return false;
+							}
+						}
+					}.bind(this)
+				} else if (f == 'paused') {
+					clearInterval(this.move);
+					document.onkeydown = function(e) {
+						if (this.state == 'paused' && (e.keyCode == 27 || e.keyCode == 32)) {
+							this.state = 'playing';
+							return false;
+						}
+						return false;
+					}.bind(this)
+				}else if (f == 'stopped') {
+					clearInterval(this.move);
+					this.$.food.style.display = 'none';
+					while (this.$.tails.firstChild) {
+						this.$.tails.removeChild(this.$.tails.firstChild);
+					}
+					this.begin();
+				} else {
+					console.log("Error: State property set to '" + f + "' .This property cannot be anything other than 'playing', 'paused' or 'stopped'.")
+				}
+				this.fire('state-change');
 			}
 		});
 	</script>
