@@ -3,7 +3,11 @@
 	<head>
 		<title>Snakes (Demo)</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<script src="../webcomponentsjs/webcomponents.js"></script>
+		<script>
+			if (!('registerElement' in document && 'createShadowRoot' in HTMLElement.prototype && 'import' in document.createElement('link') && 'content' in document.createElement('template'))) {
+				document.write('<script src="../webcomponentsjs/webcomponents.js"><\/script>');
+			}
+		</script>
 		<link rel="import" href="../game-snakes/game-snakes.html">
 		<style shim-shadowdom>
 			body {
