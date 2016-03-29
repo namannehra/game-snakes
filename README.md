@@ -24,6 +24,8 @@ Use the element:
 
 	<game-snakes></game-snakes>
 
+##
+
 _[Demo and API docs](https://namannehra.github.io/game-snakes/)_
 
 This element is made using [Polymer](https://www.polymer-project.org/)
