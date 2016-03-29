@@ -1,0 +1,92 @@
+<link rel="import" href="../polymer/polymer.html">
+<script>
+	/*
+	*An element providing keyboard controls for `game-snakes` element.
+	*
+	*| Action | Key |
+	*| --- | --- |
+	*| play | space |
+	*| pause | space |
+	*| turn up | up arrow or 'w' |
+	*| turn down | down arrow or 's' |
+	*| turn left | left arrow or 'a' |
+	*| turn right | right arrow or 'd' |
+	*/
+	Polymer({
+		is: 'game-snakes-keyboard',
+		properties: {
+			/*
+			*`game-snakes` element to be used as target.
+			*@default parent
+			*/
+			target: {
+				type: HTMLElement,
+				value: function() {
+					return Polymer.dom(this).parentNode;
+				},
+				observer: '_targetChanged'
+			},
+			/*
+			*Enables or disables keyboard controls.
+			*/
+			active: {
+				type: Boolean,
+				value: true,
+				observer: '_activeChanged'
+			}
+		},
+		_targetChanged: function(e) {
+			var f = 'function';
+			if (e && typeof e.play === f && typeof e.pause === f && typeof e.turn === f) {
+				this._validTarget = true;
+			} else {
+				this._validTarget = false;
+			}
+			this._check();
+		},
+		_activeChanged: function() {
+			this._check();
+		},
+		_check: function() {
+			if (this.active && this._validTarget) {
+				if (!this._added) {
+					this._added = true;
+					addEventListener('keydown', this._handle);
+				}
+			} else {
+				if (this._added) {
+					this._added = false;
+					removeEventListener('keydown', this._handle);
+				}
+			}
+		},
+		_handle: function(e) {
+			var key = e.key;
+			var tar = this.target;
+			var dir = '';
+			if (key === ' ') {
+				e.preventDefault();
+				if (tar.state === 'playing') {
+					tar.pause();
+				} else {
+					tar.play();
+				}
+			} else if (key === 'ArrowUp' || key === 'w') {
+				dir = 'up';
+			} else if (key === 'ArrowDown' || key === 's') {
+				dir = 'down';
+			} else if (key === 'ArrowLeft' || key === 'a') {
+				dir = 'left';
+			} else if (key === 'ArrowRight' || key === 'd') {
+				dir = 'right';
+			}
+			if (dir !== '') {
+				e.preventDefault();
+				tar.turn(dir);
+			}
+		},
+		created: function() {
+			this._handle = this._handle.bind(this);
+		}
+	});
+</script>

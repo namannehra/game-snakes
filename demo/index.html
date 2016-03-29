@@ -1,0 +1,55 @@
+<!doctype html>
+	<html>
+		<head>
+			<meta charset="utf-8">
+			<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+			<title>game-snakes Demo</title>
+			<script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
+			<link rel="import" href="../game-snakes.html">
+			<link rel="import" href="../game-snakes-keyboard.html">
+			<link rel="import" href="../game-snakes-gesture.html">
+			<style is="custom-style">
+				body {
+					background-color: #E0E0E0;
+				}
+				#fancy {
+					background-color: #7B1FA2;
+					--game-snakes-food-background: #FFEB3B;
+					--game-snakes-head: {
+						background: transparent url('hexagon.png') no-repeat;
+						background-size: contain;
+					};
+					--game-snakes-tail: {
+						background: transparent url('hexagon.png') no-repeat;
+						background-size: contain;
+					};
+				}
+			</style>
+		</head>
+		<body unresolved>
+			<p>Press spacebar or tap the game to start or pause. Use arrow keys, (a,s,w,d) or mouse or touch gesture to turn.</p>
+			<game-snakes id="normal">
+				<game-snakes-keyboard></game-snakes-keyboard>
+				<game-snakes-gesture></game-snakes-gesture>
+			</game-snakes>
+			<p>Score: <span id="score">0</span></p>
+			<br><br>
+			<p>More styled but without keyboard or gesture controls.</p>
+			<game-snakes id="fancy" size="32" height="12" width="16" gap="4" time="1000"></game-snakes>
+			<button onclick="fancy.play()">play</button>
+			<button onclick="fancy.pause()">pause</button>
+			<button onclick="fancy.stop()">stop</button>
+			<button onclick="fancy.turn('up')">up</button>
+			<button onclick="fancy.turn('down')">down</button>
+			<button onclick="fancy.turn('right')">right</button>
+			<button onclick="fancy.turn('left')">left</button>
+			<script>
+				var game = document.querySelector('#normal');
+				var score = document.querySelector('#score');
+				var fancy = document.querySelector('#fancy');
+				normal.addEventListener('score-changed', function(e) {
+					score.textContent = e.detail.value;
+				});
+			</script>
+		</body>
+</html>

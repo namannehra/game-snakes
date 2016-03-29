@@ -1,28 +1,27 @@
 {
-	"name": "game-snakes",
-	"version": "0.2.0",
-	"authors": [
-		"Naman Nehra <naman.nehra98@gmail.com>"
-	],
-	"description": "Web component providing a basic configurable snakes game. Use use arrow keys or 'a', 's', 'w', 'd' or touch screen to move. Use Space bar or Esc to pause/resume.",
-	"keywords": [
-		"game",
-		"snakes",
-		"web-component",
-		"web-components",
-		"polymer"
-	],
-	"main": "game-snakes.html",
-	"license": "MIT",
-	"homepage": "https://github.com/namannehra/game-snakes/",
-	"ignore": [
-		"/.*",
-		"/tests/"
-	],
-	"dependencies": {
-		"polymer": "Polymer/polymer#latest"
-	},
-	"devDependencies": {
-		"web-component-tester": "Polymer/web-component-tester#latest"
-	}
+  "name": "game-snakes",
+  "version": "0.3.0",
+  "authors": [
+    "Naman Nehra <naman.nehra98@gmail.com>"
+  ],
+  "description": "An element providing a snakes game.",
+  "keywords": [
+    "web-component",
+    "polymer",
+    "game",
+    "snakes"
+  ],
+  "main": "game-snakes.html",
+  "license": "MIT",
+  "homepage": "https://github.com/namannehra/game-snakes/",
+  "ignore": [
+    "/.*",
+    "/test/"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.2.0"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.1.0"
+  }
 }

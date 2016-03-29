@@ -1,338 +1,374 @@
 <link rel="import" href="../polymer/polymer.html">
-
 <!--
-Web component providing a basic configurable snakes game. Use use arrow keys or 'a', 's', 'w', 'd' or touch screen to move. Use Space bar or Esc to pause/resume.
-##### Example:
-    <game-snakes></game-snakes>
-##### Example with changed size, height, width and time:
-	<game-snakes size="40" height="10" width="10" time="60"></game-snakes>
-##### Changing style:
-	<style>
-	
-		game-snakes {
-			background-color: #4A148C;
-		}
-	
-		/*styling play food*/
-		game-snakes::shadow #food {
-			border-radius: 2px;
-			box-shadow: none;
-		}
-	
-		/*styling snake's tail and head*/
-		game-snakes::shadow .tail, game-snakes::shadow #head {
-			background-color: transparent;
-			background-image: url('../game-snakes/hexagon.png');
-			background-repeat: no-repeat;
-			background-size: contain;
-			box-shadow: none;
-		}
-	
-	</style>
-@element game-snakes
-@blurb Web component providing a basic configurable snakes game. Use use arrow keys or 'a', 's', 'w', 'd' or touch screen to move.
-@status beta
-@homepage https://github.com/namannehra/game-snakes/
--->
+An element providing a snakes game.
 
-<polymer-element name="game-snakes" attributes="size height width time score state">
+Example:
+
+		<game-snakes size="32" height="12" width="16" gap="4" time="1000"></game-snakes>
+
+Add game-snakes-keyboard and game-snakes-gesture elements for keyboard, mouse and touch controls.
+
+Example:
+
+		<game-snakes>
+				<game-snakes-keyboard></game-snakes-keyboard>
+				<game-snakes-gesture></game-snakes-gesture>
+		</game-snakes>
+
+@demo demo/
+-->
+<dom-module id="game-snakes">
 	<template>
 		<style>
 			:host {
 				display: block;
+				background-color: #FFFFFF;
+				position: relative;
 				-webkit-user-select: none;
 				user-select: none;
 			}
-			#container {
-				height: 100%;
-				position: relative;
-			}
-			#food, .tail, #head {
-				margin: 2px 0 0 2px;
+			.tail, #food, #head {
 				position: absolute;
 				top: 0;
 				left: 0;
 			}
-			#food {
-				display: none;
-				background-color: #FF4081;
-				border-radius: 50%;
-			}
 			.tail {
 				background-color: #388E3C;
 				border-radius: 2px;
+				background: var(--game-snakes-tail-background);
+				@apply(--game-snakes-tail);
+			}
+			#food {
+				background-color: #FF4081;
+				border-radius: 50%;
+				background: var(--game-snakes-food-background);
+				@apply(--game-snakes-food);
 			}
 			#head {
 				background-color: #212121;
 				border-radius: 2px;
+				background: var(--game-snakes-head-background);
+				@apply(--game-snakes-head);
 			}
 		</style>
-		<div id="container" on-trackstart="{{trackstart}}" on-track="{{track}}">
-			<div id="food"></div>
-			<div id="tails"></div>
-			<div id="head"></div>
-		</div>
+		<div id="tails"></div>
+		<div id="food"></div>
+		<div id="head"></div>
 	</template>
 	<script>
 		Polymer({
-			/**
-			  * Sets the size of one block in px
-			  * @attribute size
-			  * @type number
-			  * @default 25
-			*/
-			size: 25,
-			/**
-			  * Sets the number of blocks in height of the game area
-			  * @attribute height
-			  * @type number
-			  * @default 16
-			*/
-			height: 16,
-			/**
-			  * Sets the number of blocks in width of the game area
-			  * @attribute width
-			  * @type number
-			  * @default 16
-			*/
-			width: 16,
-			/**
-			  * Sets the time in which snake moves one block in milliseconds (Reducing this value will increase speed of the snake)
-			  * @attribute time
-			  * @type number
-			  * @default 100
-			*/
-			time: 100,
-			/**
-			  * Returns the current score
-			  * @attribute score
-			  * @type number
-			  * @default 0
-			*/
-			score: 0,
-			/**
-			  * Returns or sets the state of the game ('playing', 'paused' or 'stopped')
-			  * @attribute state
-			  * @type string
-			  * @default 'stopped'
-			*/
-			state: 'stopped',
-			ready: function() {
-				this.style.height = this.height * this.size + 'px';
-				this.style.width = this.width * this.size + 'px';
-				this.$.food.style.height = this.size - 4 + 'px';
-				this.$.food.style.width = this.size - 4 + 'px';
-				this.$.head.style.height = this.size - 4 + 'px';
-				this.$.head.style.width = this.size - 4 + 'px';
-				this.begin();
-			},
-			begin: function() {
-				this.direction = 'right';
-				this.headTop = (this.height % 2 == 0) ? this.height * this.size / 2 - this.size : this.height * this.size / 2;
-				this.headLeft = this.size * 4;
-				this.tailTop = [this.headTop, this.headTop, this.headTop];
-				this.tailLeft = [this.headLeft - (3 * this.size), this.headLeft - (2 * this.size), this.headLeft - this.size];
-				this.$.container.removeAttribute('touch-action');
-				this.$.head.style.webkitTransform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
-				this.$.head.style.transform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
-				for (var i = 0; i < 3; i++) {
-					this.setTail();
-					this.tail.id = 'tail' + i;
-					this.tail.style.webkitTransform = 'translateX(' + this.tailLeft[i] + 'px) translateY(' + this.tailTop[i] + 'px)';
-					this.tail.style.transform = 'translateX(' + this.tailLeft[i] + 'px) translateY(' + this.tailTop[i] + 'px)';
-					this.$.tails.appendChild(this.tail);
+			is: 'game-snakes',
+			properties: {
+				/*
+				*Block size, in pexels.
+				*/
+				size: {
+					type: Number,
+					value: 20,
+					observer: '_sizeChanged'
+				},
+				/*
+				*Number of blocks in vertical direction.
+				*/
+				height: {
+					type: Number,
+					value: 16,
+					observer: '_heightChanged'
+				},
+				/*
+				*Number of blocks in horizontal direction.
+				*/
+				width: {
+					type: Number,
+					value: 16,
+					observer: '_widthChanged'
+				},
+				/*
+				*Gap between blocks.
+				*/
+				gap: {
+					type: Number,
+					value: 2,
+					observer: '_gapChanged'
+				},
+				/*
+				*Time between each move. Decreasing this will increase the speed of the game.
+				*/
+				time: {
+					type: Number,
+					value: 100,
+					observer: '_timeChanged'
+				},
+				/*
+				*Eating food will increase the `score`. `score` is set to 0 when game starts.
+				*/
+				score: {
+					type: Number,
+					value: 0,
+					readOnly: true,
+					notify: true
+				},
+				/*
+				*State of the game: `'playing'`, `'paused'` or `'stopped'`.
+				*/
+				state: {
+					type: String,
+					value: 'stopped',
+					readOnly: true,
+					notify: true,
+					observer: '_stateChanged'
 				}
-				this.createFood();
 			},
-			createFood: function() {
-				loop:while (true) {
-					this.foodTop = Math.floor(Math.random() * this.height) * this.size;
-					this.foodLeft = Math.floor(Math.random() * this.width) * this.size;
-					for (var i = 0; i <= this.$.tails.childNodes.length; i++) {
-						if (this.foodTop == this.tailTop[this.tailTop.length - i] && this.foodLeft == this.tailLeft[this.tailLeft.length - i]) {
-							continue loop;
+			_sizeChanged: function(newVal, oldVal) {
+				if (newVal <= 0) {
+					console.warn('game-snakes.size is not a positive number: found ' + newVal);
+					this.size = oldVal;
+					return;
+				}
+				this._setSize();
+			},
+			_heightChanged: function(newVal, oldVal) {
+				if (newVal <= 5 || !Number.isInteger(newVal)) {
+					console.warn('game-snakes.height is not a integer greater than 5: found ' + newVal);
+					this.height = oldVal;
+					return;
+				}
+				if (this.state === 'stopped') {
+					this._currHeight = this.height;
+					this._setHeight();
+				}
+			},
+			_widthChanged: function(newVal, oldVal) {
+				if (newVal <= 5 || !Number.isInteger(newVal)) {
+					console.warn('game-snakes.width is not a integer greater than 5: found ' + newVal);
+					this.width = oldVal;
+					return;
+				}
+				if (this.state === 'stopped') {
+					this._currWidth = this.width;
+					this._setWidth();
+				}
+			},
+			_gapChanged: function(newVal, oldVal) {
+				if (newVal <= 0) {
+					console.warn('game-snakes.gap is not a positive number: found ' + newVal);
+					this.gap = oldVal;
+					return;
+				}
+				this._setGap();
+			},
+			_timeChanged: function(newVal, oldVal) {
+				if (newVal <= 0 || !Number.isInteger(newVal)) {
+					console.warn('game-snakes.time is not a positive integer: found ' + newVal);
+					this.time = oldVal;
+					return;
+				}
+				if (this.state !== 'playing') {
+					this._currTime = newVal;
+				}
+			},
+			_stateChanged: function(newVal, oldVal) {
+				var newGame = newVal === 'playing' && oldVal === 'stopped';
+				var stopped = newVal === 'stopped';
+				if (stopped) {
+					clearInterval(this._move);
+					if (oldVal) {
+						this._timeouts.forEach(clearTimeout);
+					}
+					this._timeouts = [];
+					this._currTime = this.time;
+					if (this._currHeight !== this.height) {
+						this._currHeight = this.height;
+						this._setHeight();
+					}
+					if (this._currWidth !== this.width) {
+						this._currWidth = this.width;
+						this._setWidth();
+					}
+					this.$.tails.innerHTML = '';
+					this.$.food.style.opacity = '0';
+					this._x = 4;
+					this._y = this.height % 2 === 0 ? (this.height - 2) / 2 : (this.height - 1) / 2;
+					this._position(this._x, this._y, this.$.head);
+					this._tails = [];
+					this._tailPos = [{
+						x: 3,
+						y: this._y
+					}, {
+						x: 2,
+						y: this._y
+					}, {
+						x: 1,
+						y: this._y
+					}];
+					this._tailPos.forEach(function(pos) {
+						this._createTail(pos.x, pos.y);
+					}.bind(this));
+				} else if (newGame) {
+					this._direction = 'right';
+					this._setScore(0);
+					this._setFood();
+					this.$.food.style.opacity = '1';
+				}
+				if (newVal === 'playing') {
+					this._startMoving();
+				} else if (newVal === 'paused') {
+					clearInterval(this._move);
+				}
+			},
+			_setHeight: function() {
+				if (!this._isReady) return;
+				this.style.height = this._currHeight * this.size + this.gap * (this._currHeight - 1) + 'px';
+			},
+			_setWidth: function() {
+				if (!this._isReady) return;
+				this.style.width = this._currWidth * this.size + this.gap * (this._currWidth - 1) + 'px';
+			},
+			_setGap: function() {
+				if (!this._isReady) return;
+				this._setHeight();
+				this._setWidth();
+			},
+			_setSize: function() {
+				if (!this._isReady) return;
+				this._currHeight = this.height;
+				this._currWidth = this.width;
+				this._setHeight();
+				this._setWidth();
+				this.$.food.style.height = this.size + 'px';
+				this.$.food.style.width = this.size + 'px';
+				this.$.head.style.height = this.size + 'px';
+				this.$.head.style.width = this.size + 'px';
+			},
+			_position: function(x, y, node) {
+				var block =  this.size + this.gap;
+				this.transform('translate(' + x * block + 'px, ' + y * block + 'px)', node);
+			},
+			_createTail: function(x, y) {
+				var div = this.create('div');
+				this.toggleClass('tail', true, div);
+				div.style.height = this.size + 'px';
+				div.style.width = this.size + 'px';
+				this._position(x, y, div);
+				this._tails.push(div);
+				Polymer.dom(this.$.tails).appendChild(div);
+			},
+			_setFood: function() {
+				var inTail = false;
+				this._foodX = 0;
+				this._foodY = 0;
+				var length = this._tailPos.length;
+				do {
+					var inTail = false;
+					this._foodX = Math.floor(Math.random() * this._currWidth);
+					this._foodY = Math.floor(Math.random() * this._currHeight);
+					for (var i = 0; i < length; i++) {
+						if (this._foodX === this._tailPos[i].x && this._foodY === this._tailPos[i].y) {
+							inTail = true;
+							break;
 						}
 					}
-					break;
-				}
-				this.$.food.style.webkitTransform = 'translateX(' + this.foodLeft + 'px) translateY(' + this.foodTop + 'px)';
-				this.$.food.style.transform = 'translateX(' + this.foodLeft + 'px) translateY(' + this.foodTop + 'px)';
+				} while(inTail || (this._foodX === this._x && this._foodY === this._y));
+				this._position(this._foodX, this._foodY, this.$.food);
 			},
-			setTail: function() {
-				this.tail = document.createElement('div');
-				this.tail.className = 'tail';
-				this.tail.style.height = this.size - 4 + 'px';
-				this.tail.style.width = this.size - 4 + 'px';
-			},
-			growTail: function() {
-				this.setTail();
-				this.tail.id = 'tail' + (this.score + 2);
-				this.tail.style.webkitTransform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
-				this.tail.style.transform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
-				this.async(function() {
-					this.$.tails.appendChild(this.tail);
-				}, null, this.$.tails.childNodes.length * this.time);
-			},
-			trackstart: function(e) {
-				this.trackstartX = e.clientX;
-				this.trackstartY = e.clientY;
-				this.trackend = false;
-			},
-			track: function(e) {
-				if (this.state == 'playing' && !this.trackend) {
-					this.trackX = e.clientX - this.trackstartX;
-					this.trackY = e.clientY - this.trackstartY;
-					if (Math.abs(this.trackX) >= Math.abs(this.trackY) && !(this.direction == 'right' || this.direction == 'left')) {
-						if (this.trackX > 0) {
-							this.turn('right');
-							this.trackend = true;
-						} else if (this.trackX < 0) {
-							this.turn('left');
-							this.trackend = true;
-						}
+			_moving: function(e) {
+				var length = this._tailPos.length;
+				this._tailPos.unshift({
+					x: this._x,
+					y: this._y
+				});
+				this._tailPos.pop();
+				if (e === 'up') {
+					this._y--;
+					if (this._y < 0) {
+						this.stop();
 					}
-					if (Math.abs(this.trackX) <= Math.abs(this.trackY) && !(this.direction == 'up' || this.direction == 'down')) {
-						if (this.trackY > 0) {
-							this.turn('down');
-							this.trackend = true;
-						} else if (this.trackY < 0) {
-							this.turn('up');
-							this.trackend = true;
-						}
+				} else if (e === 'down') {
+					this._y++;
+					if (this._y >= this._currHeight) {
+						this.stop();
 					}
-				}
-			},
-			turn: function(e) {
-				this.direction = e;
-				clearInterval(this.move);
-				this.moving(e);
-				if (this.state == 'playing') {
-					this.move = setInterval(function() {
-						this.moving(e);
-					}.bind(this), this.time);
-				}
-			},
-			moving: function(e) {
-				this.tailTop[this.tailTop.length] = this.headTop;
-				this.tailLeft[this.tailLeft.length] = this.headLeft;
-				if (e == 'up') {
-					this.headTop -= this.size;
-					if (this.headTop < 0) {
-						this.state = 'stopped';
-					} else {
-						this.$.head.style.webkitTransform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
-						this.$.head.style.transform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
+				} else if (e === 'left') {
+					this._x--;
+					if (this._x < 0) {
+						this.stop();
 					}
-				}
-				if (e == 'right') {
-					this.headLeft += this.size;
-					if (this.headLeft >= this.width * this.size) {
-						this.state = 'stopped';
-					} else {
-						this.$.head.style.webkitTransform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
-						this.$.head.style.transform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
-					}
-				}
-				if (e == 'down') {
-					this.headTop += this.size;
-					if (this.headTop >= this.height * this.size) {
-						this.state = 'stopped';
-					} else {
-						this.$.head.style.webkitTransform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
-						this.$.head.style.transform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
-					}
-				}
-				if (e == 'left') {
-					this.headLeft -= this.size;
-					if (this.headLeft < 0) {
-						this.state = 'stopped';
-					} else {
-						this.$.head.style.webkitTransform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
-						this.$.head.style.transform = 'translateX(' + this.headLeft + 'px) translateY(' + this.headTop + 'px)';
-					}
-				}
-				if (this.state == 'playing') {
-					for (var i = 0; i < this.$.tails.childNodes.length; i++) {
-						this.$.tails.childNodes[i].style.webkitTransform = 'translateX(' + this.tailLeft[this.tailLeft.length - i - 1] + 'px) translateY(' + this.tailTop[this.tailTop.length - i - 1] + 'px)';
-						this.$.tails.childNodes[i].style.transform = 'translateX(' + this.tailLeft[this.tailLeft.length - i - 1] + 'px) translateY(' + this.tailTop[this.tailTop.length - i - 1] + 'px)';
-					}
-				}
-				if (this.headTop == this.foodTop && this.headLeft == this.foodLeft) {
-					this.score++;
-					this.growTail();
-					this.createFood();
-				}
-				for (var i = 0; i < this.$.tails.childNodes.length; i++) {
-					if (this.headTop == this.tailTop[this.tailTop.length - i - 1] && this.headLeft == this.tailLeft[this.tailLeft.length - i -1]) {
-						this.state = 'stopped';
-						break;
-					}
-				}
-			},
-			/**
-			  * Fired whenever the score changes
-			  * @event score-change
-			*/
-			scoreChanged: function() {
-				this.fire('score-change');
-			},
-			/**
-			  * Fired whenever the state changes
-			  * @event state-change
-			*/
-			stateChanged: function(e,f) {
-				if (f == 'playing') {
-					this.$.container.setAttribute('touch-action', 'none');
-					this.$.food.style.display = 'block';
-					this.turn(this.direction);
-					if (e == 'stopped') {
-						this.score = 0;
-					}
-					document.onkeydown = function(e) {
-						if (this.state == 'playing') {
-							if (e.keyCode == 27 || e.keyCode == 32) {
-								this.state = 'paused';
-							} else if (!(this.direction == 'up' || this.direction == 'down')) {
-								if (e.keyCode == 38 || e.keyCode == 87) {
-									this.turn('up');
-								}
-								if (e.keyCode == 40 || e.keyCode == 83) {
-									this.turn('down');
-								}
-							} else if (!(this.direction == 'right' || this.direction == 'left')) {
-								if (e.keyCode == 39 || e.keyCode == 68) {
-									this.turn('right');
-								}
-								if (e.keyCode == 37 || e.keyCode == 65) {
-									this.turn('left');
-								}
-							}
-							if (e.keyCode == 27 || e.keyCode == 32 || e.keyCode == 38 || e.keyCode == 87 || e.keyCode == 40 || e.keyCode == 83 || e.keyCode == 39 || e.keyCode == 68 || e.keyCode == 37 || e.keyCode == 65) {
-								return false;
-							}
-						}
-					}.bind(this)
-				} else if (f == 'paused') {
-					clearInterval(this.move);
-					document.onkeydown = function(e) {
-						if (this.state == 'paused' && (e.keyCode == 27 || e.keyCode == 32)) {
-							this.state = 'playing';
-							return false;
-						}
-						return false;
-					}.bind(this)
-				}else if (f == 'stopped') {
-					clearInterval(this.move);
-					this.$.food.style.display = 'none';
-					while (this.$.tails.firstChild) {
-						this.$.tails.removeChild(this.$.tails.firstChild);
-					}
-					this.begin();
 				} else {
-					console.log("Error: State property set to '" + f + "' .This property cannot be anything other than 'playing', 'paused' or 'stopped'.")
+					this._x++;
+					if (this._x >= this._currWidth) {
+						this.stop();
+					}
 				}
-				this.fire('state-change');
+				for (var i = 0; i < length && this.state !== 'stopped'; i++) {
+					var pos = this._tailPos[i];
+					if (pos.x === this._x && pos.y === this._y) {
+						this.stop();
+					}
+				}
+				if (this.state === 'stopped') {
+					return;
+				}
+				this._tailPos.forEach(function(pos, index) {
+					this._position(pos.x, pos.y, this._tails[index]);
+				}.bind(this));
+				if (this._x === this._foodX && this._y === this._foodY) {
+					this._timeouts.push(setTimeout(function() {
+						this._tailPos.unshift({
+							x: this._x,
+							y: this._y
+						});
+						this._createTail(this._x, this._y);
+					}.bind(this), this._currTime * this.score));
+					this._setScore(this.score + 1);
+					this._setFood();
+				}
+				this._position(this._x, this._y, this.$.head);
+			},
+			_startMoving: function() {
+				this._moving(this._direction);
+				this._move = setInterval(function() {
+					this._moving(this._direction);
+				}.bind(this), this._currTime);
+			},
+			ready: function() {
+				this._isReady = true;
+				this._setSize();
+			},
+			/*
+			*Starts or resumes game.
+			*/
+			play: function() {
+				this._setState('playing');
+			},
+			/*
+			*Pauses game.
+			*/
+			pause: function() {
+				if (this.state === 'playing') {
+					this._setState('paused');
+				}
+			},
+			/*
+			*Stops game.
+			*/
+			stop: function() {
+				this._setState('stopped');
+			},
+			/*
+			*Turns the sanke.
+			*
+			*`Direction` is a `String`: `'up'`, `'down'`, `'right'` or `'left'`.
+			*/
+			turn: function(direction) {
+				var e = direction;
+				var f = this._direction;
+				if (this.state !== 'playing' || e === f || (e === 'up' && f === 'down') || (e === 'down' && f === 'up') || (e === 'left' && f === 'right') || (e === 'right' && f === 'left')) {
+					return;
+				}
+				clearInterval(this._move);
+				this._direction = e;
+				this._startMoving();
 			}
-		});
-	</script>
-</polymer-element>
+    });
+  </script>
+</dom-module>
