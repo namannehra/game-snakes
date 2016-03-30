@@ -101,6 +101,13 @@ Example:
 					observer: '_timeChanged'
 				},
 				/*
+				*If true then snake can pass through walls.
+				*/
+				noWalls: {
+					type: Boolean,
+					value: false
+				},
+				/*
 				*Eating food will increase the `score`. `score` is set to 0 when game starts.
 				*/
 				score: {
@@ -248,22 +255,38 @@ Example:
 				if (e === 'up') {
 					this._y--;
 					if (this._y < 0) {
-						this.stop();
+						if (this.noWalls) {
+							this._y = this._currHeight - 1;
+						} else {
+							this.stop();
+						}
 					}
 				} else if (e === 'down') {
 					this._y++;
 					if (this._y >= this._currHeight) {
-						this.stop();
+						if (this.noWalls) {
+							this._y = 0;
+						} else {
+							this.stop();
+						}
 					}
 				} else if (e === 'left') {
 					this._x--;
 					if (this._x < 0) {
-						this.stop();
+						if (this.noWalls) {
+							this._x = this._currWidth - 1;
+						} else {
+							this.stop();
+						}
 					}
 				} else {
 					this._x++;
 					if (this._x >= this._currWidth) {
-						this.stop();
+						if (this.noWalls) {
+							this._x = 0;
+						} else {
+							this.stop();
+						}
 					}
 				}
 				for (var i = 0; i < length && this.state !== 'stopped'; i++) {
