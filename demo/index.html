@@ -32,10 +32,14 @@
 				<game-snakes-keyboard></game-snakes-keyboard>
 				<game-snakes-gesture></game-snakes-gesture>
 			</game-snakes>
-			<p>Score: <span id="score">0</span></p>
+			<p>
+				<button onclick="toggleWalls()">Toggle Walls</button><br>
+				no-walls: <span id="no-walls">false</span><br>
+				Score: <span id="score">0</span>
+			</p>
 			<br><br>
 			<p>More styled but without keyboard or gesture controls.</p>
-			<game-snakes id="fancy" size="32" height="12" width="16" gap="4" time="1000"></game-snakes>
+			<game-snakes id="fancy" size="32" height="12" width="16" gap="4" no-walls time="1000"></game-snakes>
 			<button onclick="fancy.play()">play</button>
 			<button onclick="fancy.pause()">pause</button>
 			<button onclick="fancy.stop()">stop</button>
@@ -45,11 +49,16 @@
 			<button onclick="fancy.turn('left')">left</button>
 			<script>
 				var game = document.querySelector('#normal');
+				var noWalls = document.querySelector('#no-walls');
 				var score = document.querySelector('#score');
 				var fancy = document.querySelector('#fancy');
 				normal.addEventListener('score-changed', function(e) {
 					score.textContent = e.detail.value;
 				});
+				function toggleWalls() {
+					game.noWalls = !game.noWalls;
+					noWalls.textContent = game.noWalls;
+				}
 			</script>
 		</body>
 </html>

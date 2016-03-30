@@ -4,7 +4,7 @@ An element providing a snakes game.
 
 Example:
 
-		<game-snakes size="32" height="12" width="16" gap="4" time="1000"></game-snakes>
+		<game-snakes size="32" height="12" width="16" gap="4" no-walls time="1000"></game-snakes>
 
 Add game-snakes-keyboard and game-snakes-gesture elements for keyboard, mouse and touch controls.
 
@@ -101,7 +101,7 @@ Example:
 					observer: '_timeChanged'
 				},
 				/*
-				*If true then snake can pass through walls.
+				*If `true` then snake can pass through walls.
 				*/
 				noWalls: {
 					type: Boolean,
