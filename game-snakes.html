@@ -286,9 +286,11 @@ Example:
 			},
 			_startMoving: function() {
 				this._moving(this._direction);
-				this._move = setInterval(function() {
-					this._moving(this._direction);
-				}.bind(this), this._currTime);
+				if (this.state === 'playing') {
+					this._move = setInterval(function() {
+						this._moving(this._direction);
+					}.bind(this), this._currTime);
+				}
 			},
 			_stateChanged: function(newVal, oldVal) {
 				var play = newVal === 'playing';
