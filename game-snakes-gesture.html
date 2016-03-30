@@ -75,13 +75,13 @@
 		_track: function(e) {
 			var det = e.detail;
 			if (det.state === 'end') {
-				this.done = false;
+				this._done = false;
 			} else {
 				var x = det.dx;
 				var y = det.dy;
 				var $x = Math.abs(x);
 				var $y = Math.abs(y);
-				if (this.done) {
+				if (this._done) {
 					return;
 				}
 				if ($x > $y) {
@@ -90,14 +90,14 @@
 					} else {
 						this.target.turn('left');
 					}
-					this.done = true;
+					this._done = true;
 				} else if ($y > $x) {
 					if (y > 0) {
 						this.target.turn('down');
 					} else {
 						this.target.turn('up');
 					}
-					this.done = true;
+					this._done = true;
 				}
 			}
 		}
