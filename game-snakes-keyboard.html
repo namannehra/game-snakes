@@ -61,56 +61,51 @@
 			}
 		},
 		_handle: function(e) {
-			var index = -1;
-			var key = e.key;
-			if (key) {
+			var key = e[this._key];
+			if (this._lowerCase) {
 				key = key.toLowerCase();
-				for (var i = 0; i < 5; i++) {
-					if (this._keys[i].indexOf(key) !== -1) {
-						index = i;
-						break;
-					}
-				}
 			}
-			if (index === -1) {
-				for (var i = 0; i < 5; i++) {
-					if (this._codes[i].indexOf(e.keyCode) !== -1) {
-						index = i;
-						break;
-					}
-				}
-			}
-			if (index !== -1) {
-				var tar = this.target;
-				e.preventDefault();
-				if (index === 4) {
-					if (tar.state === 'playing') {
-						tar.pause();
+			for (var i = 0; i < 5; i++) {
+				if (this._keys[i].indexOf(key) !== -1) {
+					var tar = this.target;
+					e.preventDefault();
+					if (i === 4) {
+						if (tar.state === 'playing') {
+							tar.pause();
+						} else {
+							tar.play();
+						}
 					} else {
-						tar.play();
+						tar.turn(this._dir[i]);
 					}
-				} else {
-					tar.turn(this._dir[index]);
+					break;
 				}
 			}
 		},
 		created: function() {
 			this._handle = this._handle.bind(this);
 			this._dir = ['up', 'down', 'left', 'right'];
-			this._keys = [
-				['arrowup', 'w'],
-				['arrowdown', 's'],
-				['arrowleft', 'a'],
-				['arrowright', 'd'],
-				[' ']
-			];
-			this._codes = [
-				[38, 87],
-				[40, 83],
-				[37, 65],
-				[39, 68],
-				[32]
-			];
+			if ('key' in KeyboardEvent.prototype) {
+				this._key = 'key';
+				this._lowerCase = true;
+				this._keys = [
+					['arrowup', 'w'],
+					['arrowdown', 's'],
+					['arrowleft', 'a'],
+					['arrowright', 'd'],
+					[' ']
+				];
+			} else {
+				this._key = 'keyCode';
+				this._lowerCase = false;
+				this._keys = [
+					[38, 87],
+					[40, 83],
+					[37, 65],
+					[39, 68],
+					[32]
+				];
+			}
 		}
 	});
 </script>
