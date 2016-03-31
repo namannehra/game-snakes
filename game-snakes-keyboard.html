@@ -61,32 +61,56 @@
 			}
 		},
 		_handle: function(e) {
-			var key = e.key.toLowerCase();
-			var tar = this.target;
-			var dir = '';
-			if (key === ' ') {
-				e.preventDefault();
-				if (tar.state === 'playing') {
-					tar.pause();
-				} else {
-					tar.play();
+			var index = -1;
+			var key = e.key;
+			if (key) {
+				key = key.toLowerCase();
+				for (var i = 0; i < 5; i++) {
+					if (this._keys[i].indexOf(key) !== -1) {
+						index = i;
+						break;
+					}
 				}
-			} else if (key === 'ArrowUp' || key === 'w') {
-				dir = 'up';
-			} else if (key === 'ArrowDown' || key === 's') {
-				dir = 'down';
-			} else if (key === 'ArrowLeft' || key === 'a') {
-				dir = 'left';
-			} else if (key === 'ArrowRight' || key === 'd') {
-				dir = 'right';
 			}
-			if (dir !== '') {
+			if (index === -1) {
+				for (var i = 0; i < 5; i++) {
+					if (this._codes[i].indexOf(e.keyCode) !== -1) {
+						index = i;
+						break;
+					}
+				}
+			}
+			if (index !== -1) {
+				var tar = this.target;
 				e.preventDefault();
-				tar.turn(dir);
+				if (index === 4) {
+					if (tar.state === 'playing') {
+						tar.pause();
+					} else {
+						tar.play();
+					}
+				} else {
+					tar.turn(this._dir[index]);
+				}
 			}
 		},
 		created: function() {
 			this._handle = this._handle.bind(this);
+			this._dir = ['up', 'down', 'left', 'right'];
+			this._keys = [
+				['arrowup', 'w'],
+				['arrowdown', 's'],
+				['arrowleft', 'a'],
+				['arrowright', 'd'],
+				[' ']
+			];
+			this._codes = [
+				[38, 87],
+				[40, 83],
+				[37, 65],
+				[39, 68],
+				[32]
+			];
 		}
 	});
 </script>
