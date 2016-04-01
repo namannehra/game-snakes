@@ -6,8 +6,9 @@
 			<title>game-snakes Demo</title>
 			<script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
 			<link rel="import" href="../game-snakes.html">
-			<link rel="import" href="../game-snakes-keyboard.html">
-			<link rel="import" href="../game-snakes-gesture.html">
+			<link rel="import" href="../controllers/game-snakes-keyboard.html">
+			<link rel="import" href="../controllers/game-snakes-gesture.html">
+			<link rel="import" href="../controllers/game-snakes-buttons.html">
 			<style is="custom-style">
 				body {
 					background-color: #E0E0E0;
@@ -26,39 +27,32 @@
 				}
 			</style>
 		</head>
-		<body unresolved>
-			<p>Press spacebar or tap the game to start or pause. Use arrow keys, (a,s,w,d) or mouse or touch gesture to turn.</p>
-			<game-snakes id="normal">
-				<game-snakes-keyboard></game-snakes-keyboard>
-				<game-snakes-gesture></game-snakes-gesture>
-			</game-snakes>
-			<p>
-				<button onclick="toggleWalls()">Toggle Walls</button><br>
-				no-walls: <span id="no-walls">false</span><br>
-				Score: <span id="score">0</span>
-			</p>
-			<br><br>
-			<p>More styled but without keyboard or gesture controls.</p>
-			<game-snakes id="fancy" size="32" height="12" width="16" gap="4" time="1000" no-walls></game-snakes>
-			<button onclick="fancy.play()">play</button>
-			<button onclick="fancy.pause()">pause</button>
-			<button onclick="fancy.stop()">stop</button>
-			<button onclick="fancy.turn('up')">up</button>
-			<button onclick="fancy.turn('down')">down</button>
-			<button onclick="fancy.turn('right')">right</button>
-			<button onclick="fancy.turn('left')">left</button>
+		<body>
+			<template is="dom-bind">			
+				<p>Press spacebar or tap the game to start or pause. Use arrow keys, (a,s,w,d) or mouse or touch gestures to turn.</p>
+				<game-snakes score="{{score}}" no-walls="[[noWalls]]">
+					<game-snakes-keyboard></game-snakes-keyboard>
+					<game-snakes-gesture></game-snakes-gesture>
+				</game-snakes>
+				<p>
+					<button on-tap="toggleWalls">Toggle Walls</button><br>
+					no-walls: [[noWalls]]<br>
+					Score: [[score]]
+				</p>
+				<br><br>
+				<p>More styled and with controls buttons.</p>
+				<game-snakes id="fancy" size="32" height="12" width="16" gap="4" time="1000" no-walls></game-snakes><br>
+				<game-snakes-buttons id="buttons"></game-snakes-buttons>
+			</template>
 			<script>
-				var game = document.querySelector('#normal');
-				var noWalls = document.querySelector('#no-walls');
-				var score = document.querySelector('#score');
-				var fancy = document.querySelector('#fancy');
-				normal.addEventListener('score-changed', function(e) {
-					score.textContent = e.detail.value;
+				var t = document.querySelector('template');
+				t.noWalls = false;
+				t.toggleWalls = function() {
+					t.noWalls = !t.noWalls;
+				};
+				t.addEventListener('dom-change', function() {
+					t.$.buttons.target = fancy;
 				});
-				function toggleWalls() {
-					game.noWalls = !game.noWalls;
-					noWalls.textContent = game.noWalls;
-				}
 			</script>
 		</body>
 </html>

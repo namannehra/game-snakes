@@ -1,0 +1,99 @@
+<link rel="import" href="../../polymer/polymer.html">
+<script>
+	/*
+	*An element providing mouse and touch controls for `game-snakes` element.
+	*
+	*Example:
+	
+	<game-snakes>
+		<game-snakes-gesture></game-snakes-gesture>
+	<game-snakes>
+	
+	*Action     | Gesture
+	*-----------|------------
+	*play       | tap
+	*pause      | tap
+	*turn up    | swipe up
+	*turn down  | swipe down
+	*turn left  | swipe left
+	*turn right | swipe right
+	*/
+	Polymer({
+		is: 'game-snakes-gesture',
+		properties: {
+			/*
+			*Enables or disables gesture controls.
+			*/
+			active: {
+				type: Boolean,
+				value: true,
+				observer: '_check'
+			}
+		},
+		_check: function() {
+			if (this.active && this.isAttached && this._target) {
+				if (!this._added) {
+					this._added = true;
+					this.listen(this._target, 'tap', '_tap');
+					this.listen(this._target, 'track', '_track');
+					this.setScrollDirection('none', this._target);
+				}
+			} else {
+				if (this._added) {
+					this._added = false;
+					this.unlisten(this._target, 'tap', '_tap');
+					this.unlisten(this._target, 'track', '_track');
+					this.setScrollDirection('all', this._target);
+				}
+			}
+		},
+		_tap: function(e) {
+			var tar = this._target;
+			if (tar.state === 'playing') {
+				tar.pause();
+			} else {
+				tar.play()
+			}
+		},
+		_track: function(e) {
+			var det = e.detail;
+			if (det.state === 'end') {
+				this._done = false;
+			} else {
+				var x = det.dx;
+				var y = det.dy;
+				var $x = Math.abs(x);
+				var $y = Math.abs(y);
+				if (this._done) {
+					return;
+				}
+				if ($x > $y) {
+					if (x > 0) {
+						this._target.turn('right');
+					} else {
+						this._target.turn('left');
+					}
+					this._done = true;
+				} else if ($y > $x) {
+					if (y > 0) {
+						this._target.turn('down');
+					} else {
+						this._target.turn('up');
+					}
+					this._done = true;
+				}
+			}
+		},
+		ready: function() {
+			this.toggleAttribute('data-controller', true);
+		},
+		attached: function() {
+			var t = Polymer.dom(this).parentNode;
+			this._target = t && typeof t.play === 'function' && typeof t.pause === 'function' && typeof t.turn === 'function' ? t : null;
+			this._check();
+		},
+		detached: function() {
+			this._check();
+		}
+	});
+</script>

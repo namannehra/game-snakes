@@ -15,6 +15,18 @@ Example:
 				<game-snakes-gesture></game-snakes-gesture>
 		</game-snakes>
 
+### Styling
+The following custom properties and mixins are available for styling:
+
+Custom property                 | Description           | Default
+--------------------------------|-----------------------|----------
+`--game-snakes-head-background` | Head Background       | `#212121`
+`--game-snakes-tail-background` | Tail Background       | `#388E3C`
+`--game-snakes-food-background` | Food Background       | `#FF4081`
+`--game-snakes-head`            | Mixin applied to Head | `{}`
+`--game-snakes-tail`            | Mixin applied to Tail | `{}`
+`--game-snakes-food`            | Mixin applied to Food | `{}`
+
 @demo demo/
 -->
 <dom-module id="game-snakes">
@@ -27,32 +39,33 @@ Example:
 				-webkit-user-select: none;
 				user-select: none;
 			}
-			.tail, #food, #head {
+			:host ::content [data-controller] {
+				display: none;
+			}
+			#head, .tail, #food {
 				position: absolute;
 				top: 0;
 				left: 0;
 			}
-			.tail {
-				background-color: #388E3C;
-				border-radius: 2px;
-				background: var(--game-snakes-tail-background);
-				@apply(--game-snakes-tail);
-			}
-			#food {
-				background-color: #FF4081;
-				border-radius: 50%;
-				background: var(--game-snakes-food-background);
-				@apply(--game-snakes-food);
-			}
 			#head {
-				background-color: #212121;
+				background: var(--game-snakes-head-background, #212121);
 				border-radius: 2px;
 				position: relative;
 				z-index: 1;
-				background: var(--game-snakes-head-background);
 				@apply(--game-snakes-head);
 			}
+			.tail {
+				background: var(--game-snakes-tail-background, #388E3C);
+				border-radius: 2px;
+				@apply(--game-snakes-tail);
+			}
+			#food {
+				background: var(--game-snakes-food-background, #FF4081);
+				border-radius: 50%;
+				@apply(--game-snakes-food);
+			}
 		</style>
+		<content selector="[data-controller]"></content>
 		<div id="food"></div>
 		<div id="head"></div>
 	</template>
