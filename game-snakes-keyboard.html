@@ -51,12 +51,12 @@
 			if (this.active && this._validTarget) {
 				if (!this._added) {
 					this._added = true;
-					addEventListener('keydown', this._handle);
+					this.listen(window, 'keydown', '_handle');
 				}
 			} else {
 				if (this._added) {
 					this._added = false;
-					removeEventListener('keydown', this._handle);
+					this.unlisten(window, 'keydown', '_handle');
 				}
 			}
 		},
@@ -82,8 +82,7 @@
 				}
 			}
 		},
-		created: function() {
-			this._handle = this._handle.bind(this);
+		ready: function() {
 			this._dir = ['up', 'down', 'left', 'right'];
 			if ('key' in KeyboardEvent.prototype) {
 				this._key = 'key';

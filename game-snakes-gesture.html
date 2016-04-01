@@ -58,8 +58,8 @@
 			} else {
 				if (this._added) {
 					this._added = false;
-					this.listen(this.target, 'tap', '_tap');
-					this.listen(this.target, 'track', '_track');
+					this.unlisten(this.target, 'tap', '_tap');
+					this.unlisten(this.target, 'track', '_track');
 					this.setScrollDirection('all', this.target);
 				}
 			}
