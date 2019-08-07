@@ -3,6 +3,6 @@
   "private": true,
   "dependencies": {
     "game-snakes": "namannehra/game-snakes#^0.3.2",
-    "iron-component-page": "PolymerElements/iron-component-page#^1.1.5"
+    "iron-component-page": "PolymerElements/iron-component-page#^2.0.0"
   }
 }
