@@ -1,0 +1,102 @@
+<link rel="import" href="../../polymer/polymer.html">
+<script>
+	/*
+	*An element providing keyboard controls for `game-snakes` element.
+	*
+	*Example:
+	
+	<game-snakes>
+		<game-snakes-keyboard></game-snakes-keyboard>
+	<game-snakes>
+	
+	*Action     | Key
+	*-----------|-------------------
+	*play       | space
+	*pause      | space
+	*turn up    | up arrow or 'w'
+	*turn down  | down arrow or 's'
+	*turn left  | left arrow or 'a'
+	*turn right | right arrow or 'd'
+	*/
+	Polymer({
+		is: 'game-snakes-keyboard',
+		properties: {
+			/*
+			*Enables or disables keyboard controls.
+			*/
+			active: {
+				type: Boolean,
+				value: true,
+				observer: '_check'
+			}
+		},
+		_check: function() {
+			if (this.active && this.isAttached && this._target) {
+				if (!this._added) {
+					this._added = true;
+					this.listen(window, 'keydown', '_handle');
+				}
+			} else {
+				if (this._added) {
+					this._added = false;
+					this.unlisten(window, 'keydown', '_handle');
+				}
+			}
+		},
+		_handle: function(e) {
+			var key = e[this._key];
+			if (this._lowerCase) {
+				key = key.toLowerCase();
+			}
+			for (var i = 0; i < 5; i++) {
+				if (this._keys[i].indexOf(key) !== -1) {
+					var tar = this._target;
+					e.preventDefault();
+					if (i === 4) {
+						if (tar.state === 'playing') {
+							tar.pause();
+						} else {
+							tar.play();
+						}
+					} else {
+						tar.turn(this._dir[i]);
+					}
+					break;
+				}
+			}
+		},
+		ready: function() {
+			this.toggleAttribute('data-controller', true);
+			this._dir = ['up', 'down', 'left', 'right'];
+			if ('key' in KeyboardEvent.prototype) {
+				this._key = 'key';
+				this._lowerCase = true;
+				this._keys = [
+					['up', 'arrowup', 'w'],
+					['down', 'arrowdown', 's'],
+					['left', 'arrowleft', 'a'],
+					['right', 'arrowright', 'd'],
+					[' ']
+				];
+			} else {
+				this._key = 'keyCode';
+				this._lowerCase = false;
+				this._keys = [
+					[38, 87],
+					[40, 83],
+					[37, 65],
+					[39, 68],
+					[32]
+				];
+			}
+		},
+		attached: function() {
+			var t = Polymer.dom(this).parentNode;
+			this._target = t && typeof t.play === 'function' && typeof t.pause === 'function' && typeof t.turn === 'function' ? t : null;
+			this._check();
+		},
+		detached: function() {
+			this._check();
+		}
+	});
+</script>

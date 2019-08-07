@@ -1,0 +1,418 @@
+<link rel="import" href="../polymer/polymer.html">
+<!--
+An element providing a snakes game.
+
+Example:
+
+		<game-snakes size="32" height="12" width="16" gap="4" time="1000" no-walls></game-snakes>
+
+Add game-snakes-keyboard and game-snakes-gesture elements for keyboard, mouse and touch controls.
+
+Example:
+
+		<game-snakes>
+				<game-snakes-keyboard></game-snakes-keyboard>
+				<game-snakes-gesture></game-snakes-gesture>
+		</game-snakes>
+
+### Styling
+The following custom properties and mixins are available for styling:
+
+Custom property                 | Description           | Default
+--------------------------------|-----------------------|----------
+`--game-snakes-head-background` | Head Background       | `#212121`
+`--game-snakes-tail-background` | Tail Background       | `#388E3C`
+`--game-snakes-food-background` | Food Background       | `#FF4081`
+`--game-snakes-head`            | Mixin applied to Head | `{}`
+`--game-snakes-tail`            | Mixin applied to Tail | `{}`
+`--game-snakes-food`            | Mixin applied to Food | `{}`
+
+@demo demo/
+-->
+<dom-module id="game-snakes">
+	<template>
+		<style>
+			:host {
+				display: block;
+				background-color: #FFFFFF;
+				position: relative;
+				-webkit-user-select: none;
+				user-select: none;
+			}
+			:host ::content [data-controller] {
+				display: none;
+			}
+			#head, .tail, #food {
+				position: absolute;
+				top: 0;
+				left: 0;
+			}
+			#head {
+				background: var(--game-snakes-head-background, #212121);
+				border-radius: 2px;
+				position: relative;
+				z-index: 1;
+				@apply(--game-snakes-head);
+			}
+			.tail {
+				background: var(--game-snakes-tail-background, #388E3C);
+				border-radius: 2px;
+				@apply(--game-snakes-tail);
+			}
+			#food {
+				background: var(--game-snakes-food-background, #FF4081);
+				border-radius: 50%;
+				@apply(--game-snakes-food);
+			}
+		</style>
+		<content selector="[data-controller]"></content>
+		<div id="food"></div>
+		<div id="head"></div>
+	</template>
+	<script>
+		Polymer({
+			is: 'game-snakes',
+			properties: {
+				/*
+				*Block size, in pexels.
+				*/
+				size: {
+					type: Number,
+					value: 20,
+					observer: '_sizeChanged'
+				},
+				/*
+				*Number of blocks in vertical direction. Change will take effect when game stops.
+				*/
+				height: {
+					type: Number,
+					value: 16,
+					observer: '_heightChanged'
+				},
+				/*
+				*Number of blocks in horizontal direction. Change will take effect when game stops.
+				*/
+				width: {
+					type: Number,
+					value: 16,
+					observer: '_widthChanged'
+				},
+				/*
+				*Gap between blocks.
+				*/
+				gap: {
+					type: Number,
+					value: 2,
+					observer: '_gapChanged'
+				},
+				/*
+				*Time between each move. Decreasing this will increase the speed of the game. Change will take effect when game stops or pauses.
+				*/
+				time: {
+					type: Number,
+					value: 100,
+					observer: '_timeChanged'
+				},
+				/*
+				*If `true` then snake can pass through walls.
+				*/
+				noWalls: {
+					type: Boolean,
+					value: false
+				},
+				/*
+				*Eating food will increase the `score`. `score` is set to 0 when game starts.
+				*/
+				score: {
+					type: Number,
+					value: 0,
+					readOnly: true,
+					notify: true
+				},
+				/*
+				*State of the game: `'playing'`, `'paused'` or `'stopped'`.
+				*/
+				state: {
+					type: String,
+					value: 'stopped',
+					readOnly: true,
+					notify: true,
+					observer: '_stateChanged'
+				}
+			},
+			_position: function(x, y, node) {
+				var block =  this.size + this.gap;
+				this.transform('translate(' + x * block + 'px, ' + y * block + 'px)', node);
+			},
+			_positionSnake: function() {
+				this._tailPos.forEach(function(pos, index) {
+					this._position(pos.x, pos.y, this._tails[index]);
+				}.bind(this));
+				this._position(this._x, this._y, this.$.head);
+			},
+			_positionFood: function() {
+				this._position(this._foodX, this._foodY, this.$.food);
+			},
+			_setHeight: function() {
+				this.style.height = this._currHeight * this.size + this.gap * (this._currHeight - 1) + 'px';
+			},
+			_setWidth: function() {
+				this.style.width = this._currWidth * this.size + this.gap * (this._currWidth - 1) + 'px';
+			},
+			_setGap: function() {
+				this._setHeight();
+				this._setWidth();
+				this._positionSnake();
+				if (this.state !== 'stopped') {
+					this._positionFood();
+				}
+			},
+			_styleSize: function(e) {
+				e.style.height = this.size + 'px';
+				e.style.width = this.size + 'px';
+			},
+			_setSize: function() {
+				this._setGap();
+				this._styleSize(this.$.food);
+				this._styleSize(this.$.head);
+				this._tails.forEach(this._styleSize.bind(this));
+			},
+			_heightChanged: function(newVal, oldVal) {
+				if (newVal <= 5 || !Number.isInteger(newVal)) {
+					console.warn('game-snakes.height is not a integer greater than 5: found ' + newVal);
+					this.height = oldVal;
+					return;
+				}
+				if (this.state === 'stopped' && this._isReady) {
+					this._currHeight = this.height;
+					this._setHeight();
+					this._positionSnake();
+				}
+			},
+			_widthChanged: function(newVal, oldVal) {
+				if (newVal <= 5 || !Number.isInteger(newVal)) {
+					console.warn('game-snakes.width is not a integer greater than 5: found ' + newVal);
+					this.width = oldVal;
+					return;
+				}
+				if (this.state === 'stopped' && this._isReady) {
+					this._currWidth = this.width;
+					this._setWidth();
+					this._positionSnake();
+				}
+			},
+			_gapChanged: function(newVal, oldVal) {
+				if (newVal <= 0) {
+					console.warn('game-snakes.gap is not a positive number: found ' + newVal);
+					this.gap = oldVal;
+					return;
+				}
+				if (this._isReady) {
+					this._setGap();
+				}
+			},
+			_sizeChanged: function(newVal, oldVal) {
+				if (newVal <= 0) {
+					console.warn('game-snakes.size is not a positive number: found ' + newVal);
+					this.size = oldVal;
+					return;
+				}
+				if (this._isReady) {
+					this._setSize();
+				}
+			},
+			_timeChanged: function(newVal, oldVal) {
+				if (newVal <= 0 || !Number.isInteger(newVal)) {
+					console.warn('game-snakes.time is not a positive integer: found ' + newVal);
+					this.time = oldVal;
+					return;
+				}
+				if (this.state !== 'playing') {
+					this._currTime = newVal;
+				}
+			},
+			_createTail: function(size) {
+				var div = this.create('div');
+				this.toggleClass('tail', true, div);
+				if (size) {
+					this._styleSize(div);
+				}
+				this._tails.push(div);
+				Polymer.dom(this.root).appendChild(div);
+			},
+			_setFood: function() {
+				var inTail = false;
+				this._foodX = 0;
+				this._foodY = 0;
+				var length = this._tailPos.length;
+				do {
+					var inTail = false;
+					this._foodX = Math.floor(Math.random() * this._currWidth);
+					this._foodY = Math.floor(Math.random() * this._currHeight);
+					for (var i = 0; i < length; i++) {
+						if (this._foodX === this._tailPos[i].x && this._foodY === this._tailPos[i].y) {
+							inTail = true;
+							break;
+						}
+					}
+				} while(inTail || (this._foodX === this._x && this._foodY === this._y));
+				this._positionFood();
+			},
+			_moving: function(e) {
+				var length = this._tailPos.length;
+				this._tailPos.unshift({
+					x: this._x,
+					y: this._y
+				});
+				this._tailPos.pop();
+				if (e === 'up') {
+					this._y--;
+					if (this._y < 0) {
+						if (this.noWalls) {
+							this._y = this._currHeight - 1;
+						} else {
+							this.stop();
+						}
+					}
+				} else if (e === 'down') {
+					this._y++;
+					if (this._y >= this._currHeight) {
+						if (this.noWalls) {
+							this._y = 0;
+						} else {
+							this.stop();
+						}
+					}
+				} else if (e === 'left') {
+					this._x--;
+					if (this._x < 0) {
+						if (this.noWalls) {
+							this._x = this._currWidth - 1;
+						} else {
+							this.stop();
+						}
+					}
+				} else {
+					this._x++;
+					if (this._x >= this._currWidth) {
+						if (this.noWalls) {
+							this._x = 0;
+						} else {
+							this.stop();
+						}
+					}
+				}
+				for (var i = 0; i < length && this.state !== 'stopped'; i++) {
+					var pos = this._tailPos[i];
+					if (pos.x === this._x && pos.y === this._y) {
+						this.stop();
+					}
+				}
+				if (this.state === 'stopped') {
+					return;
+				}
+				if (this._x === this._foodX && this._y === this._foodY) {
+					this._tailPos.unshift({
+						x: this._x,
+						y: this._y
+					});
+					this._createTail(true);
+					this._setScore(this.score + 1);
+					this._setFood();
+				}
+				this._positionSnake();
+			},
+			_startMoving: function() {
+				this._moving(this._direction);
+				if (this.state === 'playing') {
+					this._move = setInterval(function() {
+						this._moving(this._direction);
+					}.bind(this), this._currTime);
+				}
+			},
+			_stateChanged: function(newVal, oldVal) {
+				var play = newVal === 'playing';
+				var pause = newVal === 'paused';
+				var stop = newVal === 'stopped';
+				if (pause || stop) {
+					clearInterval(this._move);
+				}
+				if (stop) {
+					this._currTime = this.time;
+					if (this._currHeight !== this.height) {
+						this._currHeight = this.height;
+						this._setHeight();
+					}
+					if (this._currWidth !== this.width) {
+						this._currWidth = this.width;
+						this._setWidth();
+					}
+					this._x = 4;
+					this._y = this.height % 2 === 0 ? (this.height - 2) / 2 : (this.height - 1) / 2;
+					this._tailPos = [];
+					if ('_tails' in this) {
+						this._tails.forEach(function(tail) {
+							tail.remove();
+						}.bind(this));
+					}
+					this._tails = [];
+					this.$.food.style.opacity = '0';
+					for (var i = 0; i <= 2; i++) {
+						this._tailPos[i] = {
+							x: this._x - i - 1,
+							y: this._y
+						};
+						this._createTail();
+					}
+					this._setSize();
+				} else if (play) {
+					if (oldVal === 'stopped') {
+						this._direction = 'right';
+						this._setScore(0);
+						this._setFood();
+						this.$.food.style.opacity = '1';
+					}
+					this._startMoving();
+				}
+			},
+			ready: function() {
+				this._isReady = true;
+			},
+			/*
+			*Starts or resumes game.
+			*/
+			play: function() {
+				this._setState('playing');
+			},
+			/*
+			*Pauses game.
+			*/
+			pause: function() {
+				if (this.state === 'playing') {
+					this._setState('paused');
+				}
+			},
+			/*
+			*Stops game.
+			*/
+			stop: function() {
+				this._setState('stopped');
+			},
+			/*
+			*Turns the sanke.
+			*
+			*`Direction` is a `String`: `'up'`, `'down'`, `'right'` or `'left'`.
+			*/
+			turn: function(direction) {
+				var e = direction;
+				var f = this._direction;
+				if (this.state !== 'playing' || e === f || (e === 'up' && f === 'down') || (e === 'down' && f === 'up') || (e === 'left' && f === 'right') || (e === 'right' && f === 'left')) {
+					return;
+				}
+				clearInterval(this._move);
+				this._direction = e;
+				this._startMoving();
+			}
+    });
+  </script>
+</dom-module>

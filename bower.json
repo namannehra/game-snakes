@@ -1,0 +1,8 @@
+{
+  "name": "game-snakes-demo",
+  "private": true,
+  "dependencies": {
+    "game-snakes": "namannehra/game-snakes#^0.3.2",
+    "iron-component-page": "PolymerElements/iron-component-page#^1.1.5"
+  }
+}

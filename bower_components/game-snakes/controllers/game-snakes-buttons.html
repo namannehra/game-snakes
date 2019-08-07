@@ -1,0 +1,150 @@
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../iron-icon/iron-icon.html">
+<link rel="import" href="../../iron-icons/av-icons.html">
+<link rel="import" href="../../iron-icons/hardware-icons.html">
+<!--
+An element providing control buttons for `game-snakes` element.
+
+Example:
+
+		<game-snakes><game-snakes>
+		<game-snakes-buttons></game-snakes-buttons>
+		<script>
+			var game = document.querySelector('game-snakes');
+			var buttons = document.querySelector('game-snakes-buttons');
+			buttons.target = game;
+		</script>
+
+### Styling
+The following custom properties and mixins are available for styling:
+
+Custom property                           | Description                  | Default
+------------------------------------------|------------------------------|----------
+`--game-snakes-buttons-arrow-background`  | Arrow Button Background      | `#388E3C`
+`--game-snakes-buttons-center-background` | Tail Background              | `#212121`
+`--game-snakes-buttons-buttons`           | Mixin applied to all buttons | `{}`
+-->
+<dom-module id="game-snakes-buttons">
+	<template>
+		<style>
+			:host {
+				display: block;
+				color: #FFFFFF;
+				height: 256px;
+				width: 256px;
+				position: relative;
+				-webkit-user-select: none;
+				user-select: none;
+			}
+			#center, #up, #down, #left, #right, iron-icon {
+				margin: auto;
+				position: absolute;
+			}
+			#center, #up, #down, #left, #right {
+				border-radius: 50%;
+				height: 96px;
+				width: 96px;
+				cursor: pointer;
+				@apply(--game-snakes-buttons-buttons);
+			}
+			#up, #down, #left, #right {
+				background: var(--game-snakes-buttons-arrow-background, #388E3C);
+			}
+			#center, iron-icon {
+				top: 0;
+				right: 0;
+				bottom: 0;
+				left: 0;
+			}
+			#center {
+				background: var(--game-snakes-buttons-center-background, #212121);
+			}
+			#up {
+				top: 0;
+				right: 0;
+				left: 0;
+			}
+			#down {
+				right: 0;
+				bottom: 0;
+				left: 0;
+			}
+			#left {
+				top: 0;
+				bottom: 0;
+				left: 0;
+			}
+			#right {
+				top: 0;
+				right: 0;
+				bottom: 0;
+			}
+			iron-icon {
+				height: 36px;
+				width: 36px;
+			}
+		</style>
+		<div id="center" on-pointerdown="_play" on-touchstart="_play" on-mousedown="_play">
+			<iron-icon id="centerIcon" icon="av:play-arrow"></iron-icon>
+		</div>
+		<div id="up" on-pointerdown="_turn" on-touchstart="_turn" on-mousedown="_turn">
+			<iron-icon icon="hardware:keyboard-arrow-up"></iron-icon>
+		</div>
+		<div id="down" on-pointerdown="_turn" on-touchstart="_turn" on-mousedown="_turn">
+			<iron-icon icon="hardware:keyboard-arrow-down"></iron-icon>
+		</div>
+		<div id="left" on-pointerdown="_turn" on-touchstart="_turn" on-mousedown="_turn">
+			<iron-icon icon="hardware:keyboard-arrow-left"></iron-icon>
+		</div>
+		<div id="right" on-pointerdown="_turn" on-touchstart="_turn" on-mousedown="_turn">
+			<iron-icon icon="hardware:keyboard-arrow-right"></iron-icon>
+		</div>
+	</template>
+	<script>
+	Polymer({
+		is: 'game-snakes-buttons',
+		properties: {
+			/*
+			*`game-snakes` element to be used as target.
+			*/
+			target: {
+				type: HTMLElement,
+				observer: '_targetChanged'
+			}
+		},
+		_targetChanged: function(newVal, oldVal) {
+			if (this._validTarget) {
+				this.unlisten(oldVal, 'state-changed', '_handleState');
+			}
+			if (newVal && typeof newVal.play === 'function' && typeof newVal.pause === 'function' && typeof newVal.turn === 'function') {
+				this._validTarget = true;
+				this.$.centerIcon.icon = newVal.state === 'playing' ? 'av:pause' : 'av:play-arrow';
+				this.listen(newVal, 'state-changed', '_handleState');
+			} else {
+				this._validTarget = false;
+				this.$.centerIcon.icon = 'av:play-arrow';
+			}
+		},
+		_handleState: function(e, det) {
+			this.$.centerIcon.icon = det.value === 'playing' ? 'av:pause' : 'av:play-arrow';
+		},
+		_play: function(e) {
+			e.preventDefault();
+			if (this._validTarget) {
+				var tar = this.target;
+				if (tar.state === 'playing') {
+					tar.pause();
+				} else {
+					tar.play();
+				}
+			}
+		},
+		_turn: function(e, det) {
+			e.preventDefault();
+			if (this._validTarget) {
+				this.target.turn(e.currentTarget.id);
+			}
+		}
+	});
+	</script>
+</dom-module>

@@ -1,0 +1,58 @@
+<!doctype html>
+	<html>
+		<head>
+			<meta charset="utf-8">
+			<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+			<title>game-snakes Demo</title>
+			<script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
+			<link rel="import" href="../game-snakes.html">
+			<link rel="import" href="../controllers/game-snakes-keyboard.html">
+			<link rel="import" href="../controllers/game-snakes-gesture.html">
+			<link rel="import" href="../controllers/game-snakes-buttons.html">
+			<style is="custom-style">
+				body {
+					background-color: #E0E0E0;
+				}
+				#fancy {
+					background-color: #7B1FA2;
+					--game-snakes-food-background: #FFEB3B;
+					--game-snakes-head: {
+						background: transparent url('hexagon.png') no-repeat;
+						background-size: contain;
+					};
+					--game-snakes-tail: {
+						background: transparent url('hexagon.png') no-repeat;
+						background-size: contain;
+					};
+				}
+			</style>
+		</head>
+		<body>
+			<template is="dom-bind">			
+				<p>Press spacebar or tap the game to start or pause. Use arrow keys, (a,s,w,d) or mouse or touch gestures to turn.</p>
+				<game-snakes score="{{score}}" no-walls="[[noWalls]]">
+					<game-snakes-keyboard></game-snakes-keyboard>
+					<game-snakes-gesture></game-snakes-gesture>
+				</game-snakes>
+				<p>
+					<button on-tap="toggleWalls">Toggle Walls</button><br>
+					no-walls: [[noWalls]]<br>
+					Score: [[score]]
+				</p>
+				<br><br>
+				<p>More styled and with controls buttons.</p>
+				<game-snakes id="fancy" size="32" height="12" width="16" gap="4" time="1000" no-walls></game-snakes><br>
+				<game-snakes-buttons id="buttons"></game-snakes-buttons>
+			</template>
+			<script>
+				var t = document.querySelector('template');
+				t.noWalls = false;
+				t.toggleWalls = function() {
+					t.noWalls = !t.noWalls;
+				};
+				t.addEventListener('dom-change', function() {
+					t.$.buttons.target = fancy;
+				});
+			</script>
+		</body>
+</html>

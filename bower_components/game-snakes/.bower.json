@@ -1,0 +1,39 @@
+{
+  "name": "game-snakes",
+  "version": "0.3.2",
+  "authors": [
+    "Naman Nehra <naman.nehra98@gmail.com>"
+  ],
+  "description": "An element providing a snakes game.",
+  "keywords": [
+    "web-component",
+    "polymer",
+    "game",
+    "snakes"
+  ],
+  "main": "game-snakes.html",
+  "license": "MIT",
+  "homepage": "https://github.com/namannehra/game-snakes/",
+  "ignore": [
+    "/.*",
+    "/test/"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.4.0",
+    "iron-icon": "PolymerElements/iron-icon#^1.0.8",
+    "iron-icons": "PolymerElements/iron-icons#^1.1.3"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.1.5"
+  },
+  "_release": "0.3.2",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.3.2",
+    "commit": "2e78a168f227820b4be9ccdd1d7110bc9e2051d0"
+  },
+  "_source": "https://github.com/namannehra/game-snakes.git",
+  "_target": "^0.3.2",
+  "_originalSource": "namannehra/game-snakes",
+  "_direct": true
+}
