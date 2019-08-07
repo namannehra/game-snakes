@@ -352,7 +352,7 @@ Custom property                 | Description           | Default
 					this._tailPos = [];
 					if ('_tails' in this) {
 						this._tails.forEach(function(tail) {
-							this.removeChild(tail);
+							tail.remove();
 						}.bind(this));
 					}
 					this._tails = [];
